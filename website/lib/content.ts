@@ -1,4 +1,4 @@
-export type PaidPlan = "pro" | "team";
+export type PaidPlan = "pro";
 
 export const siteConfig = {
   name: "Revcast",
@@ -6,7 +6,8 @@ export const siteConfig = {
   description:
     "Revcast puts MRR, revenue, and failed-payment visibility inside Raycast so founders can check the numbers that matter without leaving the keyboard.",
   shortDescription: "Revenue control without dashboard drag.",
-  supportEmail: process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || "founder@revcast.app",
+  supportEmail:
+    process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || "founder@revcast.app",
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000",
   installUrl: process.env.NEXT_PUBLIC_RAYCAST_INSTALL_URL?.trim() || "#pricing",
 };
@@ -18,7 +19,11 @@ export const navigation = [
   { href: "#faq", label: "FAQ" },
 ] as const;
 
-export const trustSignals = ["Founder-built", "Works with Stripe", "No extra dashboard"] as const;
+export const trustSignals = [
+  "Founder-built",
+  "Works with Stripe",
+  "No extra dashboard",
+] as const;
 
 export const problemPoints = [
   "Today’s revenue should not require a tab hunt.",
@@ -71,7 +76,11 @@ export const pricingPlans = [
     price: "Free",
     cadence: "",
     description: "Start with the fast revenue checks you run every day.",
-    features: ["Revenue snapshot", "Failed payment list", "Local project switching"],
+    features: [
+      "Revenue snapshot",
+      "Failed payment list",
+      "One local Stripe project",
+    ],
     ctaLabel: "Install free on Raycast",
     kind: "link" as const,
   },
@@ -79,22 +88,17 @@ export const pricingPlans = [
     name: "Pro",
     price: "$12",
     cadence: "/mo",
-    description: "For founders who want tighter revenue visibility as the business grows.",
-    features: ["Multi-workspace command center", "Priority roadmap access", "Trend view and faster refresh"],
+    description:
+      "For founders who want unlimited local workspaces and a faster revenue command center.",
+    features: [
+      "Unlimited local Stripe projects",
+      "License activation on your device",
+      "Priority roadmap access",
+    ],
     ctaLabel: "Unlock Pro",
     kind: "checkout" as const,
     plan: "pro" as PaidPlan,
     featured: true,
-  },
-  {
-    name: "Team",
-    price: "$29",
-    cadence: "/mo",
-    description: "For small teams that want shared visibility and proactive follow-up.",
-    features: ["Shared revenue visibility", "Alerts and weekly digests", "Priority support"],
-    ctaLabel: "Start Team",
-    kind: "checkout" as const,
-    plan: "team" as PaidPlan,
   },
 ] as const;
 
@@ -106,7 +110,8 @@ export const faqItems = [
   },
   {
     question: "Who is Revcast for?",
-    answer: "Indie SaaS founders and lean teams who already use Stripe and spend a lot of time inside Raycast.",
+    answer:
+      "Indie SaaS founders who already use Stripe and spend a lot of time inside Raycast.",
   },
   {
     question: "Why Dodo Payments?",

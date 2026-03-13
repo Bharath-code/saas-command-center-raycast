@@ -7,7 +7,10 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 
-type ExtensionPreferences = {}
+type ExtensionPreferences = {
+  /** Revcast Cloud URL - Optional override for the hosted Revcast billing site. Leave empty unless you're testing your own deployment. */
+  "revcastApiBaseUrl"?: string
+}
 
 /** Preferences accessible in all the extension's commands */
 declare type Preferences = ExtensionPreferences
@@ -19,6 +22,8 @@ declare namespace Preferences {
   export type Failed = ExtensionPreferences & {}
   /** Preferences accessible in the `projects` command */
   export type Projects = ExtensionPreferences & {}
+  /** Preferences accessible in the `license` command */
+  export type License = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -28,5 +33,7 @@ declare namespace Arguments {
   export type Failed = {}
   /** Arguments passed to the `projects` command */
   export type Projects = {}
+  /** Arguments passed to the `license` command */
+  export type License = {}
 }
 

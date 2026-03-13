@@ -1,43 +1,30 @@
 import { NextResponse } from "next/server";
-import DodoPayments from "dodopayments";
 
 import type { PaidPlan } from "../../../lib/content";
 import { siteConfig } from "../../../lib/content";
+import { getDodoClient, getPaidProductId } from "../../../lib/dodo";
 
 export const runtime = "nodejs";
 
-const productIds: Record<PaidPlan, string | undefined> = {
-  pro: process.env.DODO_PRODUCT_ID_PRO,
-  team: process.env.DODO_PRODUCT_ID_TEAM,
-};
-
 function isPaidPlan(value: unknown): value is PaidPlan {
-  return value === "pro" || value === "team";
-}
-
-function getDodoClient() {
-  const apiKey = process.env.DODO_PAYMENTS_API_KEY;
-
-  if (!apiKey) {
-    throw new Error("Missing DODO_PAYMENTS_API_KEY.");
-  }
-
-  return new DodoPayments({
-    bearerToken: apiKey,
-    environment: process.env.DODO_PAYMENTS_ENVIRONMENT === "live_mode" ? "live_mode" : "test_mode",
-  });
+  return value === "pro";
 }
 
 export async function POST(request: Request) {
   try {
-    const payload = (await request.json().catch(() => null)) as { plan?: unknown } | null;
+    const payload = (await request.json().catch(() => null)) as {
+      plan?: unknown;
+    } | null;
     const plan = payload?.plan;
 
     if (!isPaidPlan(plan)) {
-      return NextResponse.json({ error: "Please choose a valid plan." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Please choose a valid plan." },
+        { status: 400 },
+      );
     }
 
-    const productId = productIds[plan];
+    const productId = getPaidProductId(plan);
 
     if (!productId) {
       return NextResponse.json(
@@ -63,7 +50,10 @@ export async function POST(request: Request) {
     console.error("Failed to create Dodo checkout session", error);
 
     return NextResponse.json(
-      { error: "Unable to start checkout right now. Please try again in a moment." },
+      {
+        error:
+          "Unable to start checkout right now. Please try again in a moment.",
+      },
       { status: 500 },
     );
   }

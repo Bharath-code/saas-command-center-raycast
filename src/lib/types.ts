@@ -1,4 +1,6 @@
 export type ProjectId = string;
+export type SubscriptionPlan = "starter" | "pro";
+export type LicenseStateStatus = "active" | "inactive" | "invalid";
 
 export type ProjectInput = {
   name: string;
@@ -41,4 +43,19 @@ export type FailedPayment = {
   reason: string;
   stripeUrl: string;
   reviewed: boolean;
+};
+
+export type LicenseState = {
+  customerEmail: string;
+  customerName: string;
+  instanceId: string;
+  instanceName: string;
+  licenseKey: string;
+  licenseKeyId: string;
+  licenseStatus: string;
+  plan: SubscriptionPlan;
+  productId: string;
+  status: LicenseStateStatus;
+  subscriptionStatus: string | null;
+  updatedAt: string;
 };

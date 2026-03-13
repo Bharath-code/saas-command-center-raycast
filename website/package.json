@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@libsql/client": "0.17.0",
     "dodopayments": "2.23.2",
     "next": "16.1.6",
     "react": "19.2.4",

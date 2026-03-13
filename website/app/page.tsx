@@ -30,12 +30,6 @@ const jsonLd = {
       priceCurrency: "USD",
       description: "Pro plan",
     },
-    {
-      "@type": "Offer",
-      price: "29",
-      priceCurrency: "USD",
-      description: "Team plan",
-    },
   ],
 };
 
@@ -71,8 +65,9 @@ export default function HomePage() {
           <p className="eyebrow">For Stripe-powered indie SaaS founders</p>
           <h1>{siteConfig.headline}</h1>
           <p className="hero-lead">
-            Revcast puts MRR, revenue, and failed-payment visibility inside Raycast, so you can
-            check the number that matters before the next tab even loads.
+            Revcast puts MRR, revenue, and failed-payment visibility inside
+            Raycast, so you can check the number that matters before the next
+            tab even loads.
           </p>
 
           <div className="button-row">
@@ -136,7 +131,9 @@ export default function HomePage() {
               </article>
             </div>
 
-            <p className="preview-footnote">Open Raycast. Type rev. Get the answer. Keep shipping.</p>
+            <p className="preview-footnote">
+              Open Raycast. Type rev. Get the answer. Keep shipping.
+            </p>
           </div>
         </div>
       </section>
@@ -144,10 +141,13 @@ export default function HomePage() {
       <section className="section section-grid" id="product">
         <div className="section-head">
           <p className="eyebrow">The problem</p>
-          <h2>You do not need another dashboard for the same three questions.</h2>
+          <h2>
+            You do not need another dashboard for the same three questions.
+          </h2>
           <p>
-            Founders keep opening Stripe to check today&apos;s revenue, current MRR, and whether
-            failed payments are slipping through. That workflow is heavier than the job.
+            Founders keep opening Stripe to check today&apos;s revenue, current
+            MRR, and whether failed payments are slipping through. That workflow
+            is heavier than the job.
           </p>
         </div>
 
@@ -166,8 +166,8 @@ export default function HomePage() {
           <p className="eyebrow">The product</p>
           <h2>Revcast gives you the revenue check-in you actually need.</h2>
           <p>
-            Clean enough for daily use. Focused enough to stay out of your way. Sharp enough to
-            catch money problems before they compound.
+            Clean enough for daily use. Focused enough to stay out of your way.
+            Sharp enough to catch money problems before they compound.
           </p>
         </div>
 
@@ -190,7 +190,10 @@ export default function HomePage() {
         <div className="section-head">
           <p className="eyebrow">The workflow</p>
           <h2>Built for the way founders already work.</h2>
-          <p>Faster than opening Stripe. Cleaner than another dashboard. Good software should feel this obvious.</p>
+          <p>
+            Faster than opening Stripe. Cleaner than another dashboard. Good
+            software should feel this obvious.
+          </p>
         </div>
 
         <div className="workflow-grid">
@@ -207,10 +210,14 @@ export default function HomePage() {
       <section className="section pricing-section" id="pricing">
         <div className="section-head">
           <p className="eyebrow">Pricing</p>
-          <h2>Start free. Upgrade when revenue visibility becomes mission-critical.</h2>
+          <h2>
+            Start free. Upgrade when revenue visibility becomes
+            mission-critical.
+          </h2>
           <p>
-            Every missed payment costs more than the upgrade. Global billing runs through Dodo
-            Payments so checkout stays simple.
+            Every missed payment costs more than the upgrade. Global billing
+            runs through Dodo Payments, and Pro unlocks unlimited local
+            workspaces on this device.
           </p>
         </div>
 
@@ -231,7 +238,9 @@ export default function HomePage() {
                       <span>{plan.cadence}</span>
                     </h3>
                   </div>
-                  {isFeatured ? <span className="pricing-card__pill">Most focused</span> : null}
+                  {isFeatured ? (
+                    <span className="pricing-card__pill">Most focused</span>
+                  ) : null}
                 </div>
 
                 <p className="pricing-card__description">{plan.description}</p>
@@ -243,11 +252,18 @@ export default function HomePage() {
                 </ul>
 
                 {plan.kind === "link" ? (
-                  <a className="button button-secondary" href={siteConfig.installUrl}>
+                  <a
+                    className="button button-secondary"
+                    href={siteConfig.installUrl}
+                  >
                     {plan.ctaLabel}
                   </a>
                 ) : (
-                  <CheckoutButton featured={isFeatured} label={plan.ctaLabel} plan={plan.plan} />
+                  <CheckoutButton
+                    featured={isFeatured}
+                    label={plan.ctaLabel}
+                    plan={plan.plan}
+                  />
                 )}
               </article>
             );
@@ -276,15 +292,18 @@ export default function HomePage() {
           <p className="eyebrow">Stay in control</p>
           <h2>Stay close to revenue without living in dashboards.</h2>
           <p>
-            Install Revcast free, then upgrade when you want a tighter command center for revenue
-            ops.
+            Install Revcast free, then upgrade when you want a tighter command
+            center for revenue ops.
           </p>
 
           <div className="button-row">
             <a className="button button-primary" href={siteConfig.installUrl}>
               Install Revcast
             </a>
-            <a className="button button-secondary" href={`mailto:${siteConfig.supportEmail}`}>
+            <a
+              className="button button-secondary"
+              href={`mailto:${siteConfig.supportEmail}`}
+            >
               Talk to the founder
             </a>
           </div>

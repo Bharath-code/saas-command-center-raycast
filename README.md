@@ -1,23 +1,27 @@
-# Revcast Workspace
+# Revcast
 
-This repository now contains two parts of the Revcast product:
+Revcast is a Raycast extension for Stripe-backed SaaS founders who want revenue answers without opening another dashboard.
 
-- The Raycast extension for checking SaaS revenue from the keyboard
-- A dedicated Next.js marketing website with Dodo Payments checkout
+This repository contains:
 
-The Raycast MVP focuses on three commands:
+- The Raycast extension users install from Raycast
+- A Next.js website used for pricing, checkout, and license activation
+
+Core commands:
 
 - `rev`: revenue snapshot with today revenue, MRR, new customers, and failed payments
 - `failed`: failed payment review workflow
 - `projects`: local Stripe project management and project switching
+- `license`: paid-plan activation and billing actions
 
-## Features
+## What It Does
 
 - Local-first storage with Raycast `LocalStorage`
 - Demo mode for trying the extension without a Stripe key
 - Short-lived caching for Stripe responses to reduce duplicate API work
 - Request cancellation and race protection when switching projects or refreshing quickly
 - Typed service layer so UI components stay separated from Stripe logic
+- Optional Pro plan powered by Dodo-hosted checkout and device activation
 
 ## Commands
 
@@ -59,6 +63,22 @@ Actions:
 - Open Stripe dashboard
 - Remove a project
 - Re-enable demo mode
+
+### `license`
+
+Shows:
+
+- Current license status
+- Active plan and device activation details
+- Billing and subscription state for Pro customers
+
+Actions:
+
+- Activate or replace a license
+- Refresh license status
+- Open billing portal
+- Release the current device activation
+- Clear local license state
 
 ## Demo Mode
 
@@ -159,6 +179,25 @@ npm run website:dev
 
 The website expects the variables in [website/.env.example](/Users/bharath/Downloads/raycast-app/website/.env.example).
 
+### Billing and activation
+
+Revcast supports Dodo-hosted checkout plus device activation:
+
+- Dodo webhook endpoint: `/api/dodo/webhook`
+- License activation API: `/api/license/activate`
+- License validation API: `/api/license/validate`
+
+For this flow to work end-to-end you need:
+
+- `DODO_PAYMENTS_API_KEY`
+- `DODO_PAYMENTS_WEBHOOK_KEY`
+- `DODO_PRODUCT_ID_PRO`
+- a persistent `DATABASE_URL` for the website workspace
+
+Products in Dodo should have license keys enabled. The Raycast extension uses the `License & Billing` command to activate a purchased Pro license on the current device.
+
+For local development or self-hosting, set the Raycast extension preference `Revcast Cloud URL` to your deployed website URL. Stripe project credentials remain local to the Raycast extension in v1, and the hosted website is used only for checkout plus license APIs.
+
 ### Build the landing page
 
 ```bash
@@ -203,3 +242,13 @@ This is intentionally MVP-oriented and local-first. There is no backend yet.
 - ESLint and Prettier are configured for local validation
 - The website uses mostly static rendering for a fast landing page experience
 - Paid plan checkout is handled through Dodo-hosted checkout sessions
+
+## Raycast Store Launch Checklist
+
+Before submitting Revcast to the Raycast Store:
+
+1. Deploy the website and license APIs to a public URL.
+2. Replace the temporary `Revcast Cloud URL` testing flow with that public hosted URL for the store build.
+3. Capture polished command screenshots or GIFs for the store listing.
+4. Run `npm run lint`, `npm run build`, and `npm run test`.
+5. Submit the extension through Raycast's publishing flow with this README and `CHANGELOG.md`.

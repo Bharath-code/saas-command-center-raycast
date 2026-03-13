@@ -1,12 +1,25 @@
 {
-  "name": "saas-command-center",
+  "name": "revcast",
   "version": "0.1.0",
   "private": true,
   "workspaces": [
     "website"
   ],
-  "title": "SaaS Command Center",
-  "description": "Check SaaS revenue, review failed payments, and switch Stripe projects from Raycast.",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "revcastApiBaseUrl",
+      "type": "textfield",
+      "title": "Revcast Cloud URL",
+      "description": "Optional override for the hosted Revcast billing site. Leave empty unless you're testing your own deployment.",
+      "required": false,
+      "placeholder": "https://your-revcast-site.vercel.app"
+    }
+  ],
+  "title": "Revcast",
+  "description": "Track Stripe revenue, MRR, failed payments, and workspaces without leaving Raycast.",
   "icon": "extension-icon.png",
   "author": "bharath",
   "license": "MIT",
@@ -14,32 +27,74 @@
     "Finance",
     "Developer Tools"
   ],
+  "keywords": [
+    "stripe",
+    "revenue",
+    "mrr",
+    "saas",
+    "payments",
+    "analytics"
+  ],
   "commands": [
     {
       "name": "rev",
       "title": "Revenue Snapshot",
       "subtitle": "See SaaS metrics instantly",
       "description": "View today revenue, MRR, new customers, and failed payments.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "revenue",
+        "mrr",
+        "stripe",
+        "metrics",
+        "saas"
+      ]
     },
     {
       "name": "failed",
       "title": "Failed Payments",
       "subtitle": "Review revenue at risk",
       "description": "Inspect failed Stripe payments and mark them as reviewed.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "failed",
+        "payments",
+        "churn",
+        "invoices",
+        "stripe"
+      ]
     },
     {
       "name": "projects",
       "title": "Projects",
       "subtitle": "Manage Stripe projects",
       "description": "Add, switch, and remove Stripe projects stored on your device.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "projects",
+        "workspace",
+        "stripe",
+        "accounts"
+      ]
+    },
+    {
+      "name": "license",
+      "title": "License & Billing",
+      "subtitle": "Activate Pro",
+      "description": "Activate your Dodo Pro license and manage billing for Revcast.",
+      "mode": "view",
+      "keywords": [
+        "license",
+        "billing",
+        "subscription",
+        "pro"
+      ]
     }
   ],
   "scripts": {
     "dev": "ray develop",
     "build": "ray build",
+    "publish": "ray publish",
     "website:dev": "npm run dev --workspace website",
     "website:build": "npm run build --workspace website",
     "website:start": "npm run start --workspace website",

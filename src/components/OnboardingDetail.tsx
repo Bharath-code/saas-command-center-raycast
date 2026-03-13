@@ -17,6 +17,9 @@ Connect your Stripe account to:
 - See MRR from your keyboard
 - Catch failed payments early
 - Stay in control of growth
+
+Starter includes one live Stripe project.
+Activate Pro from License & Billing when you need unlimited local workspaces.
 `;
 
 export function OnboardingDetail(props: OnboardingDetailProps) {
