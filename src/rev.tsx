@@ -121,6 +121,14 @@ export default function RevenueSnapshotCommand() {
     void Clipboard.copy(summary);
   }
 
+  const isEmptyStripeAccount =
+    snapshot !== null &&
+    snapshot.todayRevenue === 0 &&
+    snapshot.mrr === 0 &&
+    snapshot.newCustomers === 0 &&
+    snapshot.failedPaymentsCount === 0 &&
+    snapshot.revenueAtRisk === 0;
+
   return (
     <List
       isLoading={projects.isLoading || isLoadingSnapshot}
@@ -149,6 +157,38 @@ export default function RevenueSnapshotCommand() {
       ) : null}
       {snapshot ? (
         <>
+          {isEmptyStripeAccount ? (
+            <List.EmptyView
+              title="Stripe is connected, but there is no test data yet"
+              description="Add test customers, subscriptions, invoices, or payments in Stripe Test mode, then refresh metrics."
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Refresh Metrics"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() =>
+                      void loadSnapshot({
+                        showSuccessToast: true,
+                        forceRefresh: true,
+                      })
+                    }
+                  />
+                  <Action.OpenInBrowser
+                    title="Open Stripe Dashboard"
+                    url={
+                      projects.activeProject?.dashboardUrl ??
+                      "https://dashboard.stripe.com"
+                    }
+                  />
+                  <Action
+                    title="Use Demo Metrics"
+                    icon={Icon.AppWindow}
+                    onAction={() => void projects.enableDemoProject()}
+                  />
+                </ActionPanel>
+              }
+            />
+          ) : null}
           <List.Section
             title="Revenue Metrics"
             subtitle={`Stripe • ${projects.activeProject?.name ?? "Project"}`}

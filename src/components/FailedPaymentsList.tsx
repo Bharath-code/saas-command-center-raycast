@@ -131,13 +131,23 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
     (total, payment) => total + payment.amount,
     0,
   );
+  const isEmptyStripeAccount =
+    !payments.length && props.project.secretKey.startsWith("sk_test_");
 
   if (!isLoading && !payments.length && !error) {
     return (
       <List navigationTitle="Failed Payments">
         <List.EmptyView
-          title="No failed payments today"
-          description="Your revenue is safe."
+          title={
+            isEmptyStripeAccount
+              ? "No failed payments found in Stripe Test mode"
+              : "No failed payments today"
+          }
+          description={
+            isEmptyStripeAccount
+              ? "If this is a new test account, add some test invoices or payment attempts in Stripe and refresh."
+              : "Your revenue is safe."
+          }
           actions={
             <ActionPanel>
               <Action
@@ -149,6 +159,10 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
                     forceRefresh: true,
                   })
                 }
+              />
+              <Action.OpenInBrowser
+                title="Open Stripe Dashboard"
+                url={props.project.dashboardUrl}
               />
             </ActionPanel>
           }

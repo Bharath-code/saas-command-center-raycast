@@ -59,6 +59,39 @@ Actions:
 
 If no Stripe project exists, onboarding offers `View Demo Metrics`. That creates a local demo project and serves data from [src/lib/demo-data.ts](/Users/bharath/Downloads/raycast-app/src/lib/demo-data.ts) instead of calling Stripe.
 
+## Stripe Test Mode Setup
+
+You do not need a live Stripe key for development. Use a test secret key instead.
+
+### Get a test key
+
+1. Create or log into your Stripe account.
+2. Turn on `Test mode` in the Stripe Dashboard.
+3. Open `Developers` -> `API keys`.
+4. Copy the `Secret key` that starts with `sk_test_`.
+
+Use that key in the `projects` command when adding a Stripe project.
+
+### Important key types
+
+- `sk_test_...`: test secret key, correct for this extension
+- `pk_test_...`: test publishable key, not correct for this extension
+- `sk_live_...`: live secret key, do not use for local development
+
+### If your test account is empty
+
+The extension may show zero revenue and no failed payments even though the key is valid. That usually means your Stripe test workspace has no test data yet.
+
+To generate useful data in Stripe Test mode, create:
+
+- test customers
+- test products and prices
+- test subscriptions
+- test invoices
+- test payment attempts
+
+Once those exist, refresh the `rev` or `failed` command in Raycast.
+
 ## Architecture
 
 ```text
