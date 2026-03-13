@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { LocalStorage } from "@raycast/api";
 
 import { DEMO_PROJECT_ID } from "./demo-data";
@@ -27,7 +29,7 @@ async function saveProjects(projects: StripeProject[]) {
 export async function addProject(input: ProjectInput) {
   const now = new Date().toISOString();
   const project: StripeProject = {
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     name: input.name.trim(),
     secretKey: input.secretKey.trim(),
     dashboardUrl: inferDashboardUrl(
