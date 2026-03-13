@@ -1,0 +1,155 @@
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Color,
+  Icon,
+  List,
+  Toast,
+  showToast,
+} from "@raycast/api";
+import { useEffect, useState } from "react";
+
+import { formatCurrency, formatRetryLabel } from "../lib/formatters";
+import {
+  getReviewedFailedPaymentIds,
+  markFailedPaymentReviewed,
+  markFailedPaymentUnreviewed,
+} from "../lib/storage";
+import { getFailedPayments } from "../lib/stripe-metrics-service";
+import { FailedPayment, StripeProject } from "../lib/types";
+
+type FailedPaymentsListProps = {
+  project: StripeProject;
+};
+
+function sortFailedPayments(payments: FailedPayment[]) {
+  return [...payments].sort((left, right) => Number(left.reviewed) - Number(right.reviewed));
+}
+
+export function FailedPaymentsList(props: FailedPaymentsListProps) {
+  const [payments, setPayments] = useState<FailedPayment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function loadPayments(showSuccessToast = false) {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const [livePayments, reviewedIds] = await Promise.all([
+        getFailedPayments(props.project),
+        getReviewedFailedPaymentIds(),
+      ]);
+      const reviewedIdSet = new Set(reviewedIds);
+      const nextPayments = sortFailedPayments(
+        livePayments.map((payment) => ({
+          ...payment,
+          reviewed: payment.reviewed || reviewedIdSet.has(payment.id),
+        })),
+      );
+
+      setPayments(nextPayments);
+
+      if (showSuccessToast) {
+        await showToast({ style: Toast.Style.Success, title: "Failed payments updated" });
+      }
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "Couldn't load failed payments.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadPayments();
+  }, [props.project.id]);
+
+  async function handleToggleReviewed(payment: FailedPayment) {
+    if (payment.reviewed) {
+      await markFailedPaymentUnreviewed(payment.id);
+    } else {
+      await markFailedPaymentReviewed(payment.id);
+    }
+
+    setPayments((currentPayments) =>
+      sortFailedPayments(
+        currentPayments.map((currentPayment) =>
+          currentPayment.id === payment.id ? { ...currentPayment, reviewed: !currentPayment.reviewed } : currentPayment,
+        ),
+      ),
+    );
+  }
+
+  const revenueAtRisk = payments.reduce((total, payment) => total + payment.amount, 0);
+
+  if (!isLoading && !payments.length && !error) {
+    return (
+      <List navigationTitle="Failed Payments">
+        <List.EmptyView
+          title="No failed payments today"
+          description="Your revenue is safe."
+          actions={
+            <ActionPanel>
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void loadPayments(true)} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  return (
+    <List
+      isLoading={isLoading}
+      navigationTitle="Failed Payments"
+      searchBarPlaceholder="Filter customers"
+      isShowingDetail={false}
+    >
+      {error ? (
+        <List.EmptyView
+          title="Couldn't load failed payments"
+          description={error}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => void loadPayments()} />
+            </ActionPanel>
+          }
+        />
+      ) : null}
+      <List.Section title="Revenue Risk" subtitle={`${payments.length} customers • ${formatCurrency(revenueAtRisk)}`}>
+        {payments.map((payment) => (
+          <List.Item
+            key={payment.id}
+            icon={payment.reviewed ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.ExclamationMark}
+            title={`${payment.customerName} — ${formatCurrency(payment.amount, payment.currency)}`}
+            subtitle={formatRetryLabel(payment.retryAt)}
+            accessories={[
+              {
+                tag: payment.reviewed ? "Reviewed" : payment.status === "retrying" ? "Retry Pending" : "Final Failure",
+                icon: payment.status === "retrying" ? Icon.ArrowClockwise : Icon.XMarkCircle,
+              },
+              { text: payment.reason },
+            ]}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  <Action.OpenInBrowser title="Open in Stripe" url={payment.stripeUrl} />
+                  <Action title="Copy Email" icon={Icon.Clipboard} onAction={() => Clipboard.copy(payment.customerEmail)} />
+                  <Action
+                    title={payment.reviewed ? "Mark Unreviewed" : "Mark Reviewed"}
+                    icon={payment.reviewed ? Icon.Undo : Icon.Check}
+                    onAction={() => void handleToggleReviewed(payment)}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void loadPayments(true)} />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+    </List>
+  );
+}
