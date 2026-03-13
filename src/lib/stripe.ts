@@ -3,6 +3,10 @@ type StripeListResponse<T> = {
   has_more: boolean;
 };
 
+type StripeRequestOptions = {
+  signal?: AbortSignal;
+};
+
 export type StripeSubscription = {
   id: string;
   status: string;
@@ -45,13 +49,11 @@ export type StripeInvoice = {
   customer_name: string | null;
   hosted_invoice_url: string | null;
   customer: string | null;
-  payment_intent:
-    | {
-        last_payment_error?: {
-          message?: string;
-        } | null;
-      }
-    | null;
+  payment_intent: {
+    last_payment_error?: {
+      message?: string;
+    } | null;
+  } | null;
 };
 
 type StripeErrorResponse = {
@@ -60,7 +62,12 @@ type StripeErrorResponse = {
   };
 };
 
-type StripeQueryValue = string | number | boolean | Array<string | number | boolean> | undefined;
+type StripeQueryValue =
+  | string
+  | number
+  | boolean
+  | Array<string | number | boolean>
+  | undefined;
 
 function createQueryString(query?: Record<string, StripeQueryValue>) {
   if (!query) {
@@ -88,15 +95,26 @@ function createQueryString(query?: Record<string, StripeQueryValue>) {
   return queryString ? `?${queryString}` : "";
 }
 
-async function stripeRequest<T>(secretKey: string, path: string, query?: Record<string, StripeQueryValue>) {
-  const response = await fetch(`https://api.stripe.com${path}${createQueryString(query)}`, {
-    headers: {
-      Authorization: `Bearer ${secretKey}`,
+async function stripeRequest<T>(
+  secretKey: string,
+  path: string,
+  query?: Record<string, StripeQueryValue>,
+  options?: StripeRequestOptions,
+) {
+  const response = await fetch(
+    `https://api.stripe.com${path}${createQueryString(query)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+      },
+      signal: options?.signal,
     },
-  });
+  );
 
   if (!response.ok) {
-    const errorBody = (await response.json().catch(() => ({}))) as StripeErrorResponse;
+    const errorBody = (await response
+      .json()
+      .catch(() => ({}))) as StripeErrorResponse;
     throw new Error(errorBody.error?.message ?? "Stripe request failed");
   }
 
@@ -107,17 +125,25 @@ async function stripeList<T extends { id: string }>(
   secretKey: string,
   path: string,
   query?: Record<string, StripeQueryValue>,
+  options?: StripeRequestOptions,
 ) {
   const items: T[] = [];
   let hasMore = true;
   let startingAfter: string | undefined;
 
   while (hasMore) {
-    const response = await stripeRequest<StripeListResponse<T>>(secretKey, path, {
-      ...query,
-      limit: 100,
-      starting_after: startingAfter,
-    });
+    options?.signal?.throwIfAborted();
+
+    const response = await stripeRequest<StripeListResponse<T>>(
+      secretKey,
+      path,
+      {
+        ...query,
+        limit: 100,
+        starting_after: startingAfter,
+      },
+      options,
+    );
 
     items.push(...response.data);
     hasMore = response.has_more;
@@ -131,27 +157,61 @@ async function stripeList<T extends { id: string }>(
   return items;
 }
 
-export function listSubscriptions(secretKey: string) {
-  return stripeList<StripeSubscription>(secretKey, "/v1/subscriptions", { status: "all" });
+export function listSubscriptions(
+  secretKey: string,
+  options?: StripeRequestOptions,
+) {
+  return stripeList<StripeSubscription>(
+    secretKey,
+    "/v1/subscriptions",
+    { status: "all" },
+    options,
+  );
 }
 
-export function listPaymentIntents(secretKey: string, createdAt: { gte?: number; lt?: number }) {
-  return stripeList<StripePaymentIntent>(secretKey, "/v1/payment_intents", {
-    "created[gte]": createdAt.gte,
-    "created[lt]": createdAt.lt,
-  });
+export function listPaymentIntents(
+  secretKey: string,
+  createdAt: { gte?: number; lt?: number },
+  options?: StripeRequestOptions,
+) {
+  return stripeList<StripePaymentIntent>(
+    secretKey,
+    "/v1/payment_intents",
+    {
+      "created[gte]": createdAt.gte,
+      "created[lt]": createdAt.lt,
+    },
+    options,
+  );
 }
 
-export function listCustomers(secretKey: string, createdAt: { gte?: number; lt?: number }) {
-  return stripeList<StripeCustomer>(secretKey, "/v1/customers", {
-    "created[gte]": createdAt.gte,
-    "created[lt]": createdAt.lt,
-  });
+export function listCustomers(
+  secretKey: string,
+  createdAt: { gte?: number; lt?: number },
+  options?: StripeRequestOptions,
+) {
+  return stripeList<StripeCustomer>(
+    secretKey,
+    "/v1/customers",
+    {
+      "created[gte]": createdAt.gte,
+      "created[lt]": createdAt.lt,
+    },
+    options,
+  );
 }
 
-export function listOpenInvoices(secretKey: string) {
-  return stripeList<StripeInvoice>(secretKey, "/v1/invoices", {
-    status: "open",
-    "expand[]": ["data.payment_intent"],
-  });
+export function listOpenInvoices(
+  secretKey: string,
+  options?: StripeRequestOptions,
+) {
+  return stripeList<StripeInvoice>(
+    secretKey,
+    "/v1/invoices",
+    {
+      status: "open",
+      "expand[]": ["data.payment_intent"],
+    },
+    options,
+  );
 }

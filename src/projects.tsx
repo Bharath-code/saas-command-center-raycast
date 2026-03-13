@@ -19,12 +19,20 @@ export default function ProjectsCommand() {
   const projects = useProjects();
 
   if (!projects.isLoading && !projects.projects.length) {
-    return <OnboardingDetail onDidSaveProject={projects.saveProject} onUseDemo={projects.enableDemoProject} />;
+    return (
+      <OnboardingDetail
+        onDidSaveProject={projects.saveProject}
+        onUseDemo={projects.enableDemoProject}
+      />
+    );
   }
 
   async function handleActivateProject(projectId: string, projectName: string) {
     await projects.activateProject(projectId);
-    await showToast({ style: Toast.Style.Success, title: `${projectName} is active` });
+    await showToast({
+      style: Toast.Style.Success,
+      title: `${projectName} is active`,
+    });
   }
 
   async function handleDeleteProject(projectId: string, projectName: string) {
@@ -42,12 +50,22 @@ export default function ProjectsCommand() {
     }
 
     await projects.deleteProject(projectId);
-    await showToast({ style: Toast.Style.Success, title: `${projectName} removed` });
+    await showToast({
+      style: Toast.Style.Success,
+      title: `${projectName} removed`,
+    });
   }
 
   return (
-    <List isLoading={projects.isLoading} navigationTitle="Projects" searchBarPlaceholder="Filter projects">
-      <List.Section title="Stripe Projects" subtitle={`${projects.projects.length} saved`}>
+    <List
+      isLoading={projects.isLoading}
+      navigationTitle="Projects"
+      searchBarPlaceholder="Filter projects"
+    >
+      <List.Section
+        title="Stripe Projects"
+        subtitle={`${projects.projects.length} saved`}
+      >
         {projects.projects.map((project) => {
           const accessories = [];
 
@@ -56,7 +74,9 @@ export default function ProjectsCommand() {
           }
 
           if (project.isDemo) {
-            accessories.push({ tag: { value: "Demo", color: Color.SecondaryText } });
+            accessories.push({
+              tag: { value: "Demo", color: Color.SecondaryText },
+            });
           }
 
           accessories.push({ text: formatSecretKey(project.secretKey) });
@@ -64,7 +84,11 @@ export default function ProjectsCommand() {
           return (
             <List.Item
               key={project.id}
-              icon={project.isDemo ? { source: Icon.AppWindow, tintColor: Color.Orange } : Icon.Lock}
+              icon={
+                project.isDemo
+                  ? { source: Icon.AppWindow, tintColor: Color.Orange }
+                  : Icon.Lock
+              }
               title={project.name}
               subtitle={project.dashboardUrl}
               accessories={accessories}
@@ -72,17 +96,37 @@ export default function ProjectsCommand() {
                 <ActionPanel>
                   <ActionPanel.Section>
                     {project.id !== projects.activeProject?.id ? (
-                      <Action title="Set Active Project" icon={Icon.CheckCircle} onAction={() => void handleActivateProject(project.id, project.name)} />
+                      <Action
+                        title="Set Active Project"
+                        icon={Icon.CheckCircle}
+                        onAction={() =>
+                          void handleActivateProject(project.id, project.name)
+                        }
+                      />
                     ) : null}
-                    <Action.Push title="Add Project" icon={Icon.Plus} target={<ProjectForm onDidSave={projects.saveProject} />} />
-                    <Action.OpenInBrowser title="Open Stripe Dashboard" url={project.dashboardUrl} />
+                    <Action.Push
+                      title="Add Project"
+                      icon={Icon.Plus}
+                      target={<ProjectForm onDidSave={projects.saveProject} />}
+                    />
+                    <Action
+                      title="Use Demo Metrics"
+                      icon={Icon.AppWindow}
+                      onAction={() => void projects.enableDemoProject()}
+                    />
+                    <Action.OpenInBrowser
+                      title="Open Stripe Dashboard"
+                      url={project.dashboardUrl}
+                    />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action
                       title="Remove Project"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      onAction={() => void handleDeleteProject(project.id, project.name)}
+                      onAction={() =>
+                        void handleDeleteProject(project.id, project.name)
+                      }
                     />
                   </ActionPanel.Section>
                 </ActionPanel>

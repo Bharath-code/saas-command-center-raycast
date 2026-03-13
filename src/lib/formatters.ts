@@ -19,7 +19,9 @@ export function inferDashboardUrl(secretKey: string, explicitUrl?: string) {
     return explicitUrl;
   }
 
-  return secretKey.startsWith("sk_test_") ? "https://dashboard.stripe.com/test" : "https://dashboard.stripe.com";
+  return secretKey.startsWith("sk_test_")
+    ? "https://dashboard.stripe.com/test"
+    : "https://dashboard.stripe.com";
 }
 
 export function formatRetryLabel(retryAt: string | null) {
@@ -30,7 +32,9 @@ export function formatRetryLabel(retryAt: string | null) {
   const retryDate = new Date(retryAt);
   const now = new Date();
   const dayInMs = 24 * 60 * 60 * 1000;
-  const diffInDays = Math.round((retryDate.getTime() - now.getTime()) / dayInMs);
+  const diffInDays = Math.round(
+    (retryDate.getTime() - now.getTime()) / dayInMs,
+  );
 
   if (diffInDays <= 0) {
     return "Retry today";

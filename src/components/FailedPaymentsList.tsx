@@ -8,8 +8,9 @@ import {
   Toast,
   showToast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { isAbortError } from "../lib/cache";
 import { formatCurrency, formatRetryLabel } from "../lib/formatters";
 import {
   getReviewedFailedPaymentIds,
@@ -24,23 +25,46 @@ type FailedPaymentsListProps = {
 };
 
 function sortFailedPayments(payments: FailedPayment[]) {
-  return [...payments].sort((left, right) => Number(left.reviewed) - Number(right.reviewed));
+  return [...payments].sort(
+    (left, right) => Number(left.reviewed) - Number(right.reviewed),
+  );
 }
 
 export function FailedPaymentsList(props: FailedPaymentsListProps) {
   const [payments, setPayments] = useState<FailedPayment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  async function loadPayments(showSuccessToast = false) {
+  async function loadPayments(options?: {
+    showSuccessToast?: boolean;
+    forceRefresh?: boolean;
+  }) {
+    abortControllerRef.current?.abort();
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    const requestId = ++requestIdRef.current;
+
     setIsLoading(true);
     setError(null);
 
     try {
       const [livePayments, reviewedIds] = await Promise.all([
-        getFailedPayments(props.project),
+        getFailedPayments(props.project, {
+          signal: abortController.signal,
+          forceRefresh: options?.forceRefresh,
+        }),
         getReviewedFailedPaymentIds(),
       ]);
+
+      if (
+        abortController.signal.aborted ||
+        requestId !== requestIdRef.current
+      ) {
+        return;
+      }
+
       const reviewedIdSet = new Set(reviewedIds);
       const nextPayments = sortFailedPayments(
         livePayments.map((payment) => ({
@@ -51,19 +75,39 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
 
       setPayments(nextPayments);
 
-      if (showSuccessToast) {
-        await showToast({ style: Toast.Style.Success, title: "Failed payments updated" });
+      if (options?.showSuccessToast) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Failed payments updated",
+        });
       }
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Couldn't load failed payments.");
+      if (isAbortError(loadError) || requestId !== requestIdRef.current) {
+        return;
+      }
+
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Couldn't load failed payments.",
+      );
     } finally {
-      setIsLoading(false);
+      if (requestId === requestIdRef.current) {
+        setIsLoading(false);
+      }
     }
   }
 
   useEffect(() => {
+    setPayments([]);
     void loadPayments();
   }, [props.project.id]);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   async function handleToggleReviewed(payment: FailedPayment) {
     if (payment.reviewed) {
@@ -75,13 +119,18 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
     setPayments((currentPayments) =>
       sortFailedPayments(
         currentPayments.map((currentPayment) =>
-          currentPayment.id === payment.id ? { ...currentPayment, reviewed: !currentPayment.reviewed } : currentPayment,
+          currentPayment.id === payment.id
+            ? { ...currentPayment, reviewed: !currentPayment.reviewed }
+            : currentPayment,
         ),
       ),
     );
   }
 
-  const revenueAtRisk = payments.reduce((total, payment) => total + payment.amount, 0);
+  const revenueAtRisk = payments.reduce(
+    (total, payment) => total + payment.amount,
+    0,
+  );
 
   if (!isLoading && !payments.length && !error) {
     return (
@@ -91,7 +140,16 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
           description="Your revenue is safe."
           actions={
             <ActionPanel>
-              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void loadPayments(true)} />
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                onAction={() =>
+                  void loadPayments({
+                    showSuccessToast: true,
+                    forceRefresh: true,
+                  })
+                }
+              />
             </ActionPanel>
           }
         />
@@ -112,38 +170,74 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
           description={error}
           actions={
             <ActionPanel>
-              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => void loadPayments()} />
+              <Action
+                title="Try Again"
+                icon={Icon.ArrowClockwise}
+                onAction={() => void loadPayments({ forceRefresh: true })}
+              />
             </ActionPanel>
           }
         />
       ) : null}
-      <List.Section title="Revenue Risk" subtitle={`${payments.length} customers • ${formatCurrency(revenueAtRisk)}`}>
+      <List.Section
+        title="Revenue Risk"
+        subtitle={`${payments.length} customers • ${formatCurrency(revenueAtRisk)}`}
+      >
         {payments.map((payment) => (
           <List.Item
             key={payment.id}
-            icon={payment.reviewed ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.ExclamationMark}
+            icon={
+              payment.reviewed
+                ? { source: Icon.CheckCircle, tintColor: Color.Green }
+                : Icon.ExclamationMark
+            }
             title={`${payment.customerName} — ${formatCurrency(payment.amount, payment.currency)}`}
             subtitle={formatRetryLabel(payment.retryAt)}
             accessories={[
               {
-                tag: payment.reviewed ? "Reviewed" : payment.status === "retrying" ? "Retry Pending" : "Final Failure",
-                icon: payment.status === "retrying" ? Icon.ArrowClockwise : Icon.XMarkCircle,
+                tag: payment.reviewed
+                  ? "Reviewed"
+                  : payment.status === "retrying"
+                    ? "Retry Pending"
+                    : "Final Failure",
+                icon:
+                  payment.status === "retrying"
+                    ? Icon.ArrowClockwise
+                    : Icon.XMarkCircle,
               },
               { text: payment.reason },
             ]}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.OpenInBrowser title="Open in Stripe" url={payment.stripeUrl} />
-                  <Action title="Copy Email" icon={Icon.Clipboard} onAction={() => Clipboard.copy(payment.customerEmail)} />
+                  <Action.OpenInBrowser
+                    title="Open in Stripe"
+                    url={payment.stripeUrl}
+                  />
                   <Action
-                    title={payment.reviewed ? "Mark Unreviewed" : "Mark Reviewed"}
+                    title="Copy Email"
+                    icon={Icon.Clipboard}
+                    onAction={() => Clipboard.copy(payment.customerEmail)}
+                  />
+                  <Action
+                    title={
+                      payment.reviewed ? "Mark Unreviewed" : "Mark Reviewed"
+                    }
                     icon={payment.reviewed ? Icon.Undo : Icon.Check}
                     onAction={() => void handleToggleReviewed(payment)}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void loadPayments(true)} />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() =>
+                      void loadPayments({
+                        showSuccessToast: true,
+                        forceRefresh: true,
+                      })
+                    }
+                  />
                 </ActionPanel.Section>
               </ActionPanel>
             }

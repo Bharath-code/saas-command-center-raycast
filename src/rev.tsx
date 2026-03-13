@@ -8,11 +8,12 @@ import {
   Toast,
   showToast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { FailedPaymentsList } from "./components/FailedPaymentsList";
 import { OnboardingDetail } from "./components/OnboardingDetail";
 import { useProjects } from "./hooks/useProjects";
+import { isAbortError } from "./lib/cache";
 import { formatCurrency, formatPercentDelta } from "./lib/formatters";
 import { getRevenueSnapshot } from "./lib/stripe-metrics-service";
 import { RevenueSnapshot } from "./lib/types";
@@ -22,39 +23,85 @@ export default function RevenueSnapshotCommand() {
   const [snapshot, setSnapshot] = useState<RevenueSnapshot | null>(null);
   const [isLoadingSnapshot, setIsLoadingSnapshot] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  async function loadSnapshot(showSuccessToast = false) {
+  async function loadSnapshot(options?: {
+    showSuccessToast?: boolean;
+    forceRefresh?: boolean;
+  }) {
     if (!projects.activeProject) {
       return;
     }
+
+    abortControllerRef.current?.abort();
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    const requestId = ++requestIdRef.current;
 
     setIsLoadingSnapshot(true);
     setError(null);
 
     try {
-      const nextSnapshot = await getRevenueSnapshot(projects.activeProject);
+      const nextSnapshot = await getRevenueSnapshot(projects.activeProject, {
+        signal: abortController.signal,
+        forceRefresh: options?.forceRefresh,
+      });
+
+      if (
+        abortController.signal.aborted ||
+        requestId !== requestIdRef.current
+      ) {
+        return;
+      }
+
       setSnapshot(nextSnapshot);
 
-      if (showSuccessToast) {
-        await showToast({ style: Toast.Style.Success, title: "Metrics updated" });
+      if (options?.showSuccessToast) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Metrics updated",
+        });
       }
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Couldn't load revenue metrics.");
+      if (isAbortError(loadError) || requestId !== requestIdRef.current) {
+        return;
+      }
+
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Couldn't load revenue metrics.",
+      );
     } finally {
-      setIsLoadingSnapshot(false);
+      if (requestId === requestIdRef.current) {
+        setIsLoadingSnapshot(false);
+      }
     }
   }
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
 
   useEffect(() => {
     if (!projects.activeProject) {
       return;
     }
 
+    setSnapshot(null);
     void loadSnapshot();
   }, [projects.activeProject?.id]);
 
   if (!projects.isLoading && !projects.activeProject) {
-    return <OnboardingDetail onDidSaveProject={projects.saveProject} onUseDemo={projects.enableDemoProject} />;
+    return (
+      <OnboardingDetail
+        onDidSaveProject={projects.saveProject}
+        onUseDemo={projects.enableDemoProject}
+      />
+    );
   }
 
   function copySnapshot() {
@@ -86,30 +133,73 @@ export default function RevenueSnapshotCommand() {
           description={error}
           actions={
             <ActionPanel>
-              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={() => void loadSnapshot()} />
-              <Action title="Use Demo Metrics" icon={Icon.AppWindow} onAction={() => void projects.enableDemoProject()} />
+              <Action
+                title="Try Again"
+                icon={Icon.ArrowClockwise}
+                onAction={() => void loadSnapshot({ forceRefresh: true })}
+              />
+              <Action
+                title="Use Demo Metrics"
+                icon={Icon.AppWindow}
+                onAction={() => void projects.enableDemoProject()}
+              />
             </ActionPanel>
           }
         />
       ) : null}
       {snapshot ? (
         <>
-          <List.Section title="Revenue Metrics" subtitle={`Stripe • ${projects.activeProject?.name ?? "Project"}`}>
+          <List.Section
+            title="Revenue Metrics"
+            subtitle={`Stripe • ${projects.activeProject?.name ?? "Project"}`}
+          >
             <List.Item
               icon={{ source: Icon.Coins, tintColor: Color.Green }}
               title="Today Revenue"
-              subtitle={snapshot.todayRevenueDelta === null ? snapshot.todayRevenueContext : formatPercentDelta(snapshot.todayRevenueDelta)}
-              accessories={[{ text: formatCurrency(snapshot.todayRevenue, snapshot.currency) }]}
+              subtitle={
+                snapshot.todayRevenueDelta === null
+                  ? snapshot.todayRevenueContext
+                  : formatPercentDelta(snapshot.todayRevenueDelta)
+              }
+              accessories={[
+                {
+                  text: formatCurrency(
+                    snapshot.todayRevenue,
+                    snapshot.currency,
+                  ),
+                },
+              ]}
               actions={
                 <ActionPanel>
-                  <Action title="Refresh Metrics" icon={Icon.ArrowClockwise} onAction={() => void loadSnapshot(true)} />
-                  <Action title="Copy Snapshot" icon={Icon.Clipboard} onAction={copySnapshot} />
+                  <Action
+                    title="Refresh Metrics"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() =>
+                      void loadSnapshot({
+                        showSuccessToast: true,
+                        forceRefresh: true,
+                      })
+                    }
+                  />
+                  <Action
+                    title="Copy Snapshot"
+                    icon={Icon.Clipboard}
+                    onAction={copySnapshot}
+                  />
                   <Action.OpenInBrowser
                     title="Open Stripe Dashboard"
-                    url={projects.activeProject?.dashboardUrl ?? "https://dashboard.stripe.com"}
+                    url={
+                      projects.activeProject?.dashboardUrl ??
+                      "https://dashboard.stripe.com"
+                    }
                   />
                   {projects.activeProject ? (
-                    <Action.Push title="View Failed Payments" target={<FailedPaymentsList project={projects.activeProject} />} />
+                    <Action.Push
+                      title="View Failed Payments"
+                      target={
+                        <FailedPaymentsList project={projects.activeProject} />
+                      }
+                    />
                   ) : null}
                 </ActionPanel>
               }
@@ -118,11 +208,26 @@ export default function RevenueSnapshotCommand() {
               icon={{ source: Icon.LineChart, tintColor: Color.Blue }}
               title="Monthly Recurring Revenue"
               subtitle={snapshot.mrrContext}
-              accessories={[{ text: formatCurrency(snapshot.mrr, snapshot.currency) }]}
+              accessories={[
+                { text: formatCurrency(snapshot.mrr, snapshot.currency) },
+              ]}
               actions={
                 <ActionPanel>
-                  <Action title="Refresh Metrics" icon={Icon.ArrowClockwise} onAction={() => void loadSnapshot(true)} />
-                  <Action title="Copy Snapshot" icon={Icon.Clipboard} onAction={copySnapshot} />
+                  <Action
+                    title="Refresh Metrics"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() =>
+                      void loadSnapshot({
+                        showSuccessToast: true,
+                        forceRefresh: true,
+                      })
+                    }
+                  />
+                  <Action
+                    title="Copy Snapshot"
+                    icon={Icon.Clipboard}
+                    onAction={copySnapshot}
+                  />
                 </ActionPanel>
               }
             />
@@ -133,8 +238,21 @@ export default function RevenueSnapshotCommand() {
               accessories={[{ text: String(snapshot.newCustomers) }]}
               actions={
                 <ActionPanel>
-                  <Action title="Refresh Metrics" icon={Icon.ArrowClockwise} onAction={() => void loadSnapshot(true)} />
-                  <Action title="Copy Snapshot" icon={Icon.Clipboard} onAction={copySnapshot} />
+                  <Action
+                    title="Refresh Metrics"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() =>
+                      void loadSnapshot({
+                        showSuccessToast: true,
+                        forceRefresh: true,
+                      })
+                    }
+                  />
+                  <Action
+                    title="Copy Snapshot"
+                    icon={Icon.Clipboard}
+                    onAction={copySnapshot}
+                  />
                 </ActionPanel>
               }
             />
@@ -144,19 +262,38 @@ export default function RevenueSnapshotCommand() {
               icon={{ source: Icon.ExclamationMark, tintColor: Color.Orange }}
               title="Failed Payments"
               subtitle={`${formatCurrency(snapshot.revenueAtRisk, snapshot.currency)} at risk`}
-              accessories={[
-                { text: String(snapshot.failedPaymentsCount) },
-              ]}
+              accessories={[{ text: String(snapshot.failedPaymentsCount) }]}
               actions={
                 <ActionPanel>
-                  <Action title="Refresh Metrics" icon={Icon.ArrowClockwise} onAction={() => void loadSnapshot(true)} />
-                  <Action title="Copy Snapshot" icon={Icon.Clipboard} onAction={copySnapshot} />
+                  <Action
+                    title="Refresh Metrics"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() =>
+                      void loadSnapshot({
+                        showSuccessToast: true,
+                        forceRefresh: true,
+                      })
+                    }
+                  />
+                  <Action
+                    title="Copy Snapshot"
+                    icon={Icon.Clipboard}
+                    onAction={copySnapshot}
+                  />
                   <Action.OpenInBrowser
                     title="Open Stripe Dashboard"
-                    url={projects.activeProject?.dashboardUrl ?? "https://dashboard.stripe.com"}
+                    url={
+                      projects.activeProject?.dashboardUrl ??
+                      "https://dashboard.stripe.com"
+                    }
                   />
                   {projects.activeProject ? (
-                    <Action.Push title="View Failed Payments" target={<FailedPaymentsList project={projects.activeProject} />} />
+                    <Action.Push
+                      title="View Failed Payments"
+                      target={
+                        <FailedPaymentsList project={projects.activeProject} />
+                      }
+                    />
                   ) : null}
                 </ActionPanel>
               }

@@ -27,17 +27,17 @@ Positioning:
 
 Primary:
 
-* Indie SaaS founders
-* Solo dev founders
-* Micro-startup operators
-* Stripe subscription businesses
-* Raycast daily users
+- Indie SaaS founders
+- Solo dev founders
+- Micro-startup operators
+- Stripe subscription businesses
+- Raycast daily users
 
 Not targeting:
 
-* Enterprises
-* Non-Stripe founders
-* Casual Raycast users
+- Enterprises
+- Non-Stripe founders
+- Casual Raycast users
 
 ---
 
@@ -45,10 +45,10 @@ Not targeting:
 
 Founders:
 
-* open Stripe repeatedly
-* lose context
-* miss failed payments
-* waste time dashboard hopping
+- open Stripe repeatedly
+- lose context
+- miss failed payments
+- waste time dashboard hopping
 
 ---
 
@@ -58,16 +58,16 @@ Founders:
 
 Shows:
 
-* Today Revenue
-* MRR
-* New Customers
-* Failed Payments Count
+- Today Revenue
+- MRR
+- New Customers
+- Failed Payments Count
 
 Actions:
 
-* Refresh
-* Open Stripe dashboard
-* Copy summary
+- Refresh
+- Open Stripe dashboard
+- Copy summary
 
 ---
 
@@ -75,15 +75,15 @@ Actions:
 
 List:
 
-* Customer name
-* Amount
-* Retry date
+- Customer name
+- Amount
+- Retry date
 
 Actions:
 
-* Open in Stripe
-* Copy email
-* Mark reviewed
+- Open in Stripe
+- Copy email
+- Mark reviewed
 
 ---
 
@@ -91,8 +91,8 @@ Actions:
 
 User can:
 
-* Add multiple Stripe keys
-* Switch active project
+- Add multiple Stripe keys
+- Switch active project
 
 ---
 
@@ -100,14 +100,14 @@ User can:
 
 Free:
 
-* 1 project
-* manual refresh
+- 1 project
+- manual refresh
 
 Paid:
 
-* multi-project
-* failed payment alerts
-* faster refresh
+- multi-project
+- failed payment alerts
+- faster refresh
 
 ---
 
@@ -115,11 +115,11 @@ Paid:
 
 Do NOT build:
 
-* charts
-* AI insights
-* team features
-* email automation
-* dashboards
+- charts
+- AI insights
+- team features
+- email automation
+- dashboards
 
 Not MVP.
 
@@ -194,22 +194,22 @@ landing/
 
 ### Extension
 
-* Raycast SDK (React)
-* TypeScript
+- Raycast SDK (React)
+- TypeScript
 
 ### Payments
 
-* Stripe API
+- Stripe API
 
 ### Backend (Later)
 
-* Next.js API routes
-* Supabase Postgres
-* Vercel cron
+- Next.js API routes
+- Supabase Postgres
+- Vercel cron
 
 ### Analytics
 
-* Posthog
+- Posthog
 
 ---
 
@@ -231,9 +231,9 @@ $12/month
 
 Includes:
 
-* alerts
-* multi-project
-* faster sync
+- alerts
+- multi-project
+- faster sync
 
 ---
 
@@ -247,26 +247,26 @@ $29/month
 
 ### Product Metrics
 
-* installs
-* activation rate (Stripe connect)
-* WAU
-* command frequency
+- installs
+- activation rate (Stripe connect)
+- WAU
+- command frequency
 
 ### Revenue Metrics
 
-* free → paid conversion
-* churn
-* MRR
+- free → paid conversion
+- churn
+- MRR
 
 ---
 
 # 🎯 MVP Goals (30 Days)
 
-* Ship working extension
-* 500 installs
-* 150 activated users
-* 20 paying users
-* $100–200 MRR
+- Ship working extension
+- 500 installs
+- 150 activated users
+- 20 paying users
+- $100–200 MRR
 
 This is success.
 
@@ -276,27 +276,27 @@ This is success.
 
 ## Week 1
 
-* scaffold extension
-* build `rev` command
-* Stripe MRR logic
-* GitHub publish
+- scaffold extension
+- build `rev` command
+- Stripe MRR logic
+- GitHub publish
 
 ## Week 2
 
-* failed payments list
-* onboarding polish
-* soft paywall
+- failed payments list
+- onboarding polish
+- soft paywall
 
 ## Week 3
 
-* outreach + installs
-* fix bugs
-* testimonials
+- outreach + installs
+- fix bugs
+- testimonials
 
 ## Week 4
 
-* alerts system (basic)
-* pricing experiment
+- alerts system (basic)
+- pricing experiment
 
 ---
 
@@ -312,18 +312,18 @@ Stop opening Stripe dashboards 20 times a day.
 
 ### Bullets
 
-* See MRR in seconds
-* Catch failed payments
-* Switch projects fast
+- See MRR in seconds
+- Catch failed payments
+- Switch projects fast
 
 ---
 
 # 🔥 Distribution Plan
 
-* Raycast store listing
-* Twitter build-in-public
-* Indie Hackers outreach
-* DM Stripe founders
+- Raycast store listing
+- Twitter build-in-public
+- Indie Hackers outreach
+- DM Stripe founders
 
 ---
 
@@ -331,9 +331,9 @@ Stop opening Stripe dashboards 20 times a day.
 
 Daily rule:
 
-* 3 hours build
-* ship one visible improvement
-* talk to 3 users
+- 3 hours build
+- ship one visible improvement
+- talk to 3 users
 
 No zero days.
 
@@ -343,8 +343,8 @@ No zero days.
 
 Not:
 
-* perfect UI
-* many features
+- perfect UI
+- many features
 
 Success =
 
@@ -353,7 +353,3 @@ Success =
 Everything else compounds from there.
 
 ---
-
-
-
-

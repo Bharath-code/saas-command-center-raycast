@@ -18,16 +18,16 @@ UI must never talk Stripe directly.
 
 This gives future:
 
-* testability
-* reuse in web SaaS
-* cleaner architecture
+- testability
+- reuse in web SaaS
+- cleaner architecture
 
 ---
 
 ## 🧠 File Location
 
 ```ts
-extension/lib/stripeMetricsService.ts
+extension / lib / stripeMetricsService.ts;
 ```
 
 ---
@@ -36,12 +36,12 @@ extension/lib/stripeMetricsService.ts
 
 This service should:
 
-* fetch subscriptions
-* compute MRR
-* fetch payment intents
-* compute today revenue
-* fetch failed invoices
-* compute revenue at risk
+- fetch subscriptions
+- compute MRR
+- fetch payment intents
+- compute today revenue
+- fetch failed invoices
+- compute revenue at risk
 
 ---
 
@@ -54,8 +54,8 @@ export async function getRevenueSnapshot(stripeKey: string) {
     todayRevenue: number,
     newCustomers: number,
     failedPaymentsCount: number,
-    revenueAtRisk: number
-  }
+    revenueAtRisk: number,
+  };
 }
 ```
 
@@ -68,14 +68,14 @@ This becomes your **single source of truth.**
 ```ts
 function calculateMRR(subscriptions) {
   return subscriptions.reduce((sum, sub) => {
-    const amount = sub.plan.amount / 100
+    const amount = sub.plan.amount / 100;
 
     if (sub.plan.interval === "year") {
-      return sum + amount / 12
+      return sum + amount / 12;
     }
 
-    return sum + amount
-  }, 0)
+    return sum + amount;
+  }, 0);
 }
 ```
 
@@ -88,13 +88,13 @@ Keep normalization here.
 Fetch:
 
 ```ts
-GET /v1/payment_intents
+GET / v1 / payment_intents;
 ```
 
 Filter:
 
-* created timestamp > startOfDay
-* status === "succeeded"
+- created timestamp > startOfDay
+- status === "succeeded"
 
 ---
 
@@ -108,7 +108,7 @@ GET /v1/invoices?status=open
 
 Sum:
 
-* amount_due
+- amount_due
 
 ---
 
@@ -116,9 +116,9 @@ Sum:
 
 Later:
 
-* add caching
-* debounce refresh
-* batch Stripe calls
+- add caching
+- debounce refresh
+- batch Stripe calls
 
 But NOT MVP.
 
@@ -173,8 +173,8 @@ Accessory: Card Declined
 
 Use icon accessory:
 
-* 🔁 retry pending
-* ❌ final failure
+- 🔁 retry pending
+- ❌ final failure
 
 ---
 
@@ -308,15 +308,15 @@ Type "rev" to see your metrics.
 
 Build:
 
-* small
-* composable
-* keyboard-first
+- small
+- composable
+- keyboard-first
 
 Do NOT build:
 
-* modal heavy flows
-* visual dashboards
-* multi-step navigation
+- modal heavy flows
+- visual dashboards
+- multi-step navigation
 
 Raycast UX = speed.
 

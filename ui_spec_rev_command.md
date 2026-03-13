@@ -169,8 +169,8 @@ enter
 
 Then:
 
-* arrow down
-* enter action
+- arrow down
+- enter action
 
 Everything reachable in **< 2 seconds.**
 
@@ -187,9 +187,9 @@ Raycast users prefer:
 
 Avoid:
 
-* paragraphs
-* explanations
-* fancy formatting
+- paragraphs
+- explanations
+- fancy formatting
 
 ---
 
@@ -235,8 +235,8 @@ Never freeze screen.
 
 Use:
 
-* 🟢 growth
-* ⚠️ risk
+- 🟢 growth
+- ⚠️ risk
 
 User brain scans emotionally.
 
@@ -246,8 +246,8 @@ User brain scans emotionally.
 
 Always show:
 
-* vs yesterday
-* vs last week
+- vs yesterday
+- vs last week
 
 Numbers feel alive.
 
@@ -282,10 +282,10 @@ This sequence is intentional.
 
 Just:
 
-* header
-* 3 metrics
-* failed payments item
-* refresh action
+- header
+- 3 metrics
+- failed payments item
+- refresh action
 
 Hardcode values.
 
@@ -294,4 +294,3 @@ Run extension.
 Feel momentum.
 
 ---
-
