@@ -1,6 +1,11 @@
-# SaaS Command Center
+# Revcast Workspace
 
-A Raycast extension for checking SaaS revenue from the keyboard. The MVP focuses on three commands:
+This repository now contains two parts of the Revcast product:
+
+- The Raycast extension for checking SaaS revenue from the keyboard
+- A dedicated Next.js marketing website with Dodo Payments checkout
+
+The Raycast MVP focuses on three commands:
 
 - `rev`: revenue snapshot with today revenue, MRR, new customers, and failed payments
 - `failed`: failed payment review workflow
@@ -111,6 +116,15 @@ Important files:
 - [src/lib/stripe-metrics-service.ts](/Users/bharath/Downloads/raycast-app/src/lib/stripe-metrics-service.ts)
 - [src/lib/storage.ts](/Users/bharath/Downloads/raycast-app/src/lib/storage.ts)
 
+## Repository Structure
+
+```text
+.
+├── src/                 # Raycast extension source
+├── website/             # Next.js landing page + Dodo checkout
+└── docs/                # Brand, copy, pricing, launch notes
+```
+
 ## Development
 
 ### Requirements
@@ -125,16 +139,30 @@ Important files:
 npm install
 ```
 
-### Run in Raycast
+### Run the Raycast extension
 
 ```bash
 npm run dev
 ```
 
-### Build
+### Build the Raycast extension
 
 ```bash
 npm run build
+```
+
+### Run the landing page
+
+```bash
+npm run website:dev
+```
+
+The website expects the variables in [website/.env.example](/Users/bharath/Downloads/raycast-app/website/.env.example).
+
+### Build the landing page
+
+```bash
+npm run website:build
 ```
 
 ### Lint
@@ -173,3 +201,5 @@ This is intentionally MVP-oriented and local-first. There is no backend yet.
 - Caches snapshot and failed-payment results briefly per project
 - Unit tests cover MRR normalization and snapshot aggregation
 - ESLint and Prettier are configured for local validation
+- The website uses mostly static rendering for a fast landing page experience
+- Paid plan checkout is handled through Dodo-hosted checkout sessions

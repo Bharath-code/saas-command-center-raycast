@@ -2,6 +2,9 @@
   "name": "saas-command-center",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "website"
+  ],
   "title": "SaaS Command Center",
   "description": "Check SaaS revenue, review failed payments, and switch Stripe projects from Raycast.",
   "icon": "extension-icon.png",
@@ -37,6 +40,9 @@
   "scripts": {
     "dev": "ray develop",
     "build": "ray build",
+    "website:dev": "npm run dev --workspace website",
+    "website:build": "npm run build --workspace website",
+    "website:start": "npm run start --workspace website",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "format": "prettier --write .",
