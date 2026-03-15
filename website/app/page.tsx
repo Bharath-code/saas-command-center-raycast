@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Image from "next/image";
 
 import emptyStateImage from "../../extensions/revcast/metadata/6-empty-state.png";
@@ -7,16 +8,23 @@ import onboardingImage from "../../extensions/revcast/metadata/4-onboarding.png"
 import projectsImage from "../../extensions/revcast/metadata/3-projects.png";
 import revenueSnapshotImage from "../../extensions/revcast/metadata/1-revenue-snapshot-action.png";
 import { CheckoutButton } from "../components/CheckoutButton";
+import { ScreenshotCarousel } from "../components/ScreenshotCarousel";
+import { WaitlistForm } from "../components/WaitlistForm";
 import {
   contactLinks,
+  finalCta,
   faqItems,
   navigation,
+  prelaunchNotice,
   pricingPlans,
+  pricingIntro,
   problemPoints,
   productFeatures,
+  roadmapItems,
   screenshotShowcase,
   siteConfig,
   trustSignals,
+  waitlistConfig,
   workflowSteps,
 } from "../lib/content";
 
@@ -42,6 +50,12 @@ const jsonLd = {
     },
     {
       "@type": "Offer",
+      price: "49",
+      priceCurrency: "USD",
+      description: "Pro Yearly plan",
+    },
+    {
+      "@type": "Offer",
       price: "59",
       priceCurrency: "USD",
       description: "Lifetime plan",
@@ -63,6 +77,9 @@ export default function HomePage() {
     ...shot,
     image: screenshotAssets[shot.asset],
   }));
+  const isPrelaunch = siteConfig.launchStage === "prelaunch";
+  const waitlistHref = (interest?: string) =>
+    interest ? `/?interest=${interest}#waitlist` : "#waitlist";
 
   return (
     <main className="page-shell">
@@ -85,8 +102,11 @@ export default function HomePage() {
           ))}
         </nav>
 
-        <a className="button button-secondary button-compact" href="#pricing">
-          Unlock Pro
+        <a
+          className="button button-secondary button-compact"
+          href={isPrelaunch ? waitlistHref() : "#pricing"}
+        >
+          {isPrelaunch ? "Join Waitlist" : "Unlock Pro"}
         </a>
       </header>
 
@@ -101,8 +121,8 @@ export default function HomePage() {
           </p>
 
           <div className="button-row">
-            <a className="button button-primary" href={siteConfig.installUrl}>
-              Install free on Raycast
+            <a className="button button-primary" href={waitlistHref()}>
+              {isPrelaunch ? "Join the launch waitlist" : "Install free on Raycast"}
             </a>
             <a className="button button-secondary" href="#pricing">
               See pricing
@@ -114,56 +134,57 @@ export default function HomePage() {
               <li key={signal}>{signal}</li>
             ))}
           </ul>
+
+          {isPrelaunch ? (
+            <div className="approval-note" role="note">
+              <strong>{prelaunchNotice.label}</strong>
+              <p>{prelaunchNotice.detail}</p>
+            </div>
+          ) : null}
         </div>
 
         <div className="hero-preview" aria-label="Revcast product preview">
-          <div className="preview-window">
+          <div className="preview-window preview-window-image">
             <div className="preview-window__header">
               <span />
               <span />
               <span />
             </div>
 
-            <div className="command-bar">
-              <span className="command-chip">cmd</span>
-              <span className="command-chip">space</span>
-              <span className="command-text">rev</span>
+            <div className="preview-window__toolbar">
+              <span className="preview-window__badge">Actual extension screen</span>
+              <span className="preview-window__command">rev</span>
             </div>
 
-            <div className="preview-caption">
-              <span>Revenue Snapshot</span>
-              <span>Example view</span>
-            </div>
-
-            <div className="metric-grid">
-              <article className="metric-card">
-                <span className="metric-label">MRR</span>
-                <strong>$12,480</strong>
-                <p>Normalized from active subscriptions.</p>
-              </article>
-
-              <article className="metric-card">
-                <span className="metric-label">Today</span>
-                <strong>$420</strong>
-                <p>Revenue processed today.</p>
-              </article>
-
-              <article className="metric-card metric-card-positive">
-                <span className="metric-label">New customers</span>
-                <strong>7</strong>
-                <p>Added in the current cycle.</p>
-              </article>
-
-              <article className="metric-card metric-card-danger">
-                <span className="metric-label">Revenue at risk</span>
-                <strong>$310</strong>
-                <p>Failed payments worth follow-up.</p>
-              </article>
+            <div className="preview-window__image-frame">
+              <Image
+                src={revenueSnapshotImage}
+                alt="Revcast revenue snapshot action in Raycast showing MRR, today revenue, failed payments, and actions."
+                className="preview-window__image"
+                priority
+                sizes="(max-width: 1080px) 100vw, 40vw"
+              />
             </div>
 
             <p className="preview-footnote">
-              Open Raycast. Type rev. Get the answer. Keep shipping.
+              Revenue snapshot inside Raycast, using the actual Revcast UI.
             </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-grid waitlist-section" id="waitlist">
+        <div className="section-head">
+          <p className="eyebrow">{waitlistConfig.eyebrow}</p>
+          <h2>{waitlistConfig.title}</h2>
+          <p>{waitlistConfig.description}</p>
+        </div>
+
+        <div className="waitlist-panel">
+          <div className="waitlist-panel__form">
+            <Suspense fallback={<div className="waitlist-form-skeleton" />}>
+              <WaitlistForm />
+            </Suspense>
           </div>
         </div>
       </section>
@@ -217,38 +238,15 @@ export default function HomePage() {
       <section className="section section-grid screenshot-section" id="screens">
         <div className="section-head">
           <p className="eyebrow">Inside the extension</p>
-          <h2>Real Raycast screens, not marketing mockups.</h2>
+          <h2>Actual Revcast screens, shown one at a time.</h2>
           <p>
-            These are the actual flows founders use inside Revcast, from the
-            first snapshot to onboarding, project switching, failed payment
-            follow-up, and license management.
+            The product should be easy to understand at a glance. This tighter
+            walkthrough keeps one screen in focus while the description explains
+            what that command is good at.
           </p>
         </div>
 
-        <div className="showcase-grid">
-          {screenshots.map((shot) => (
-            <article key={shot.title} className="showcase-card">
-              <div className="showcase-card__meta">
-                <span className="showcase-card__command">{shot.command}</span>
-                <span className="showcase-card__label">{shot.title}</span>
-              </div>
-
-              <div className="showcase-card__media">
-                <Image
-                  src={shot.image}
-                  alt={shot.alt}
-                  className="showcase-card__image"
-                  sizes="(max-width: 1080px) 100vw, 50vw"
-                />
-              </div>
-
-              <div className="showcase-card__copy">
-                <h3>{shot.title}</h3>
-                <p>{shot.description}</p>
-              </div>
-            </article>
-          ))}
-        </div>
+        <ScreenshotCarousel slides={screenshots} />
       </section>
 
       <section className="section workflow-section" id="workflow">
@@ -274,13 +272,9 @@ export default function HomePage() {
 
       <section className="section pricing-section" id="pricing">
         <div className="section-head">
-          <p className="eyebrow">Pricing</p>
-          <h2>Start free, then unlock Pro when one workspace stops being enough.</h2>
-          <p>
-            The launch pricing stays simple: free for one local Stripe
-            project, $5/month for ongoing Pro access, or a one-time lifetime
-            purchase for founders who would rather skip another subscription.
-          </p>
+          <p className="eyebrow">{pricingIntro.eyebrow}</p>
+          <h2>{pricingIntro.title}</h2>
+          <p>{pricingIntro.description}</p>
         </div>
 
         <div className="pricing-grid">
@@ -313,30 +307,57 @@ export default function HomePage() {
                   ))}
                 </ul>
 
-                {plan.kind === "link" ? (
+                {isPrelaunch ? (
                   <a
-                    className="button button-secondary"
-                    href={siteConfig.installUrl}
+                    className={isFeatured ? "button button-primary" : "button button-secondary"}
+                    href={waitlistHref(plan.waitlistInterest)}
                   >
                     {plan.ctaLabel}
+                  </a>
+                ) : plan.kind === "link" ? (
+                  <a className="button button-secondary" href={siteConfig.installUrl}>
+                    {plan.liveCtaLabel}
                   </a>
                 ) : (
                   <CheckoutButton
                     featured={isFeatured}
-                    label={plan.ctaLabel}
+                    label={plan.liveCtaLabel}
                     plan={plan.checkoutPlan}
                   />
                 )}
+
+                <p className="pricing-card__note">{plan.note}</p>
               </article>
             );
           })}
         </div>
       </section>
 
+      <section className="section section-grid roadmap-section" id="roadmap">
+        <div className="section-head">
+          <p className="eyebrow">Roadmap</p>
+          <h2>Planned improvements that increase value without turning Revcast into bloat.</h2>
+          <p>
+            These are the product upgrades I want to ship after launch. They are
+            intentionally framed as planned work, not guaranteed dates or fake promises.
+          </p>
+        </div>
+
+        <div className="roadmap-grid">
+          {roadmapItems.map((item) => (
+            <article key={item.title} className="roadmap-card">
+              <span className="roadmap-card__pill">Planned</span>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="section faq-section" id="faq">
         <div className="section-head">
           <p className="eyebrow">FAQ</p>
-          <h2>Clear answers for how Revcast actually works.</h2>
+          <h2>Clear answers for how Revcast works and how this prelaunch is being handled.</h2>
         </div>
 
         <div className="faq-stack">
@@ -356,22 +377,19 @@ export default function HomePage() {
 
       <section className="section final-cta">
         <div className="final-cta__panel">
-          <p className="eyebrow">Stay in control</p>
-          <h2>Keep Stripe one command away, not one more tab away.</h2>
-          <p>
-            Install Revcast free, connect a project or start in demo mode, and
-            upgrade to Pro when you want unlimited workspaces on this device.
-          </p>
+          <p className="eyebrow">{finalCta.eyebrow}</p>
+          <h2>{finalCta.title}</h2>
+          <p>{finalCta.description}</p>
 
           <div className="button-row">
-            <a className="button button-primary" href={siteConfig.installUrl}>
-              Install Revcast
+            <a className="button button-primary" href={waitlistHref()}>
+              {finalCta.primaryLabel}
             </a>
             <a
               className="button button-secondary"
               href={`mailto:${siteConfig.supportEmail}`}
             >
-              Email Bharath
+              {finalCta.secondaryLabel}
             </a>
           </div>
         </div>

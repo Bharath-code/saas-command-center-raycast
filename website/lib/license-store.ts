@@ -8,7 +8,7 @@ import type { LicenseKey } from "dodopayments/resources/license-keys";
 import type { Payment } from "dodopayments/resources/payments";
 import type { Subscription } from "dodopayments/resources/subscriptions";
 
-import type { PaidPlan } from "./content";
+import type { PaidPlan, WaitlistInterest } from "./content";
 import { getPlanForProduct } from "./dodo";
 
 export type StoredLicense = {
@@ -29,6 +29,15 @@ export type StoredLicense = {
   updatedAt: string;
 };
 
+export type StoredWaitlistSignup = {
+  createdAt: string;
+  email: string;
+  id: string;
+  interest: WaitlistInterest;
+  source: string;
+  updatedAt: string;
+};
+
 let client: Client | null = null;
 let initialized = false;
 
@@ -38,10 +47,26 @@ function getDefaultDatabaseUrl() {
   return `file:${path.join(dataDirectory, "revcast.db")}`;
 }
 
+function ensureDatabaseDirectory(databaseUrl: string) {
+  if (!databaseUrl.startsWith("file:")) {
+    return;
+  }
+
+  const filePath = databaseUrl.slice("file:".length);
+  const absolutePath = path.isAbsolute(filePath)
+    ? filePath
+    : path.join(process.cwd(), filePath);
+
+  fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+}
+
 function getDatabaseClient() {
   if (!client) {
+    const databaseUrl = process.env.DATABASE_URL || getDefaultDatabaseUrl();
+    ensureDatabaseDirectory(databaseUrl);
+
     client = createClient({
-      url: process.env.DATABASE_URL || getDefaultDatabaseUrl(),
+      url: databaseUrl,
       authToken: process.env.DATABASE_AUTH_TOKEN,
     });
   }
@@ -90,9 +115,18 @@ export async function ensureLicenseStore() {
         event_type TEXT NOT NULL,
         processed_at TEXT NOT NULL
       )`,
+      `CREATE TABLE IF NOT EXISTS waitlist_signups (
+        id TEXT PRIMARY KEY,
+        email TEXT NOT NULL UNIQUE,
+        interest TEXT NOT NULL,
+        source TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )`,
       `CREATE INDEX IF NOT EXISTS licenses_customer_email_idx ON licenses(customer_email)`,
       `CREATE INDEX IF NOT EXISTS licenses_customer_id_idx ON licenses(customer_id)`,
       `CREATE INDEX IF NOT EXISTS licenses_subscription_id_idx ON licenses(dodo_subscription_id)`,
+      `CREATE INDEX IF NOT EXISTS waitlist_signups_interest_idx ON waitlist_signups(interest)`,
     ].map((statement) => ({ sql: statement })),
     "write",
   );
@@ -464,4 +498,90 @@ export async function getCustomerForLicense(licenseKeyId: string) {
     customer,
     license,
   };
+}
+
+export async function upsertWaitlistSignup(input: {
+  email: string;
+  interest: WaitlistInterest;
+  source: string;
+}) {
+  await ensureLicenseStore();
+
+  const now = new Date().toISOString();
+  const normalizedEmail = input.email.toLowerCase();
+  const id = `wait_${normalizedEmail}`;
+
+  await getDatabaseClient().execute({
+    sql: `INSERT INTO waitlist_signups (
+      id,
+      email,
+      interest,
+      source,
+      created_at,
+      updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?)
+    ON CONFLICT(email) DO UPDATE SET
+      interest = excluded.interest,
+      source = excluded.source,
+      updated_at = excluded.updated_at`,
+    args: [id, normalizedEmail, input.interest, input.source, now, now],
+  });
+}
+
+export async function getWaitlistSignupByEmail(email: string) {
+  await ensureLicenseStore();
+
+  const result = await getDatabaseClient().execute({
+    sql: `SELECT
+      created_at,
+      email,
+      id,
+      interest,
+      source,
+      updated_at
+    FROM waitlist_signups
+    WHERE email = ?
+    LIMIT 1`,
+    args: [email.toLowerCase()],
+  });
+
+  const row = result.rows[0];
+
+  if (!row) {
+    return null;
+  }
+
+  return {
+    createdAt: row.created_at as string,
+    email: row.email as string,
+    id: row.id as string,
+    interest: row.interest as WaitlistInterest,
+    source: row.source as string,
+    updatedAt: row.updated_at as string,
+  } satisfies StoredWaitlistSignup;
+}
+
+export async function listWaitlistSignups() {
+  await ensureLicenseStore();
+
+  const result = await getDatabaseClient().execute({
+    sql: `SELECT
+      created_at,
+      email,
+      id,
+      interest,
+      source,
+      updated_at
+    FROM waitlist_signups
+    ORDER BY updated_at DESC, created_at DESC`,
+  });
+
+  return result.rows.map((row) => ({
+    createdAt: row.created_at as string,
+    email: row.email as string,
+    id: row.id as string,
+    interest: row.interest as WaitlistInterest,
+    source: row.source as string,
+    updatedAt: row.updated_at as string,
+  })) satisfies StoredWaitlistSignup[];
 }
