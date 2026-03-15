@@ -428,10 +428,14 @@ button {
 
 .surface-card,
 .feature-card,
+.showcase-card,
 .pricing-card,
 .faq-card,
+.faq-item,
 .workflow-card,
-.status-panel {
+.status-panel,
+.contact-card,
+.contact-panel {
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
@@ -637,6 +641,175 @@ button {
   padding: 24px;
 }
 
+.screenshot-section {
+  position: relative;
+}
+
+.showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.showcase-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.showcase-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.showcase-card__command,
+.showcase-card__label,
+.contact-card__label {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.showcase-card__command {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--surface-dark);
+  color: white;
+}
+
+.showcase-card__label,
+.contact-card__label {
+  color: var(--muted);
+}
+
+.showcase-card__media {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.showcase-card__image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.showcase-card__copy h3,
+.contact-panel h2,
+.contact-card strong {
+  margin: 0;
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+}
+
+.showcase-card__copy h3 {
+  font-size: 1.34rem;
+}
+
+.showcase-card__copy p,
+.contact-panel p,
+.contact-card p,
+.faq-item p {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.faq-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.faq-item {
+  padding: 22px 24px;
+}
+
+.faq-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 1.18rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 1.2rem;
+  flex: 0 0 auto;
+  transition: transform 160ms ease;
+}
+
+.faq-item[open] .faq-item__icon {
+  transform: rotate(45deg);
+}
+
+.contact-section {
+  padding-top: 34px;
+}
+
+.contact-panel {
+  display: grid;
+  gap: 24px;
+  padding: 30px;
+}
+
+.contact-panel__copy {
+  max-width: 700px;
+}
+
+.contact-panel h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.contact-card {
+  display: grid;
+  gap: 10px;
+  padding: 22px;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.contact-card:hover,
+.contact-card:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(91, 91, 214, 0.28);
+  box-shadow: var(--shadow-lg);
+}
+
+.contact-card strong {
+  font-size: 1.32rem;
+}
+
 .final-cta {
   padding-top: 70px;
 }
@@ -712,10 +885,14 @@ button {
   .preview-window,
   .surface-card,
   .feature-card,
+  .showcase-card,
   .workflow-card,
   .pricing-card,
   .faq-card,
-  .final-cta__panel {
+  .faq-item,
+  .final-cta__panel,
+  .contact-card,
+  .contact-panel {
     animation: rise-in 700ms ease both;
   }
 }
@@ -747,7 +924,9 @@ button {
   .feature-grid,
   .pricing-grid,
   .faq-grid,
-  .workflow-grid {
+  .workflow-grid,
+  .showcase-grid,
+  .contact-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -795,11 +974,15 @@ button {
   .preview-window,
   .surface-card,
   .feature-card,
+  .showcase-card,
   .workflow-card,
   .pricing-card,
   .faq-card,
+  .faq-item,
   .final-cta__panel,
-  .status-panel {
+  .status-panel,
+  .contact-card,
+  .contact-panel {
     border-radius: 22px;
   }
 

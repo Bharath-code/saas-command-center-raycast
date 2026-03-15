@@ -1,10 +1,20 @@
+import Image from "next/image";
+
+import emptyStateImage from "../../extensions/revcast/metadata/6-empty-state.png";
+import failedPaymentsImage from "../../extensions/revcast/metadata/2-failed-payments.png";
+import licenseImage from "../../extensions/revcast/metadata/5-license.png";
+import onboardingImage from "../../extensions/revcast/metadata/4-onboarding.png";
+import projectsImage from "../../extensions/revcast/metadata/3-projects.png";
+import revenueSnapshotImage from "../../extensions/revcast/metadata/1-revenue-snapshot-action.png";
 import { CheckoutButton } from "../components/CheckoutButton";
 import {
+  contactLinks,
   faqItems,
   navigation,
   pricingPlans,
   problemPoints,
   productFeatures,
+  screenshotShowcase,
   siteConfig,
   trustSignals,
   workflowSteps,
@@ -33,7 +43,21 @@ const jsonLd = {
   ],
 };
 
+const screenshotAssets = {
+  snapshot: revenueSnapshotImage,
+  failed: failedPaymentsImage,
+  projects: projectsImage,
+  onboarding: onboardingImage,
+  license: licenseImage,
+  empty: emptyStateImage,
+} as const;
+
 export default function HomePage() {
+  const screenshots = screenshotShowcase.map((shot) => ({
+    ...shot,
+    image: screenshotAssets[shot.asset],
+  }));
+
   return (
     <main className="page-shell">
       <script
@@ -62,12 +86,12 @@ export default function HomePage() {
 
       <section className="hero section">
         <div className="hero-copy">
-          <p className="eyebrow">For Stripe-powered indie SaaS founders</p>
+          <p className="eyebrow">Raycast extension for Stripe-backed founders</p>
           <h1>{siteConfig.headline}</h1>
           <p className="hero-lead">
-            Revcast puts MRR, revenue, and failed-payment visibility inside
-            Raycast, so you can check the number that matters before the next
-            tab even loads.
+            Revcast brings your revenue snapshot, failed-payment queue, project
+            switching, and Pro licensing into Raycast so the daily Stripe check
+            takes seconds instead of another dashboard detour.
           </p>
 
           <div className="button-row">
@@ -141,13 +165,11 @@ export default function HomePage() {
       <section className="section section-grid" id="product">
         <div className="section-head">
           <p className="eyebrow">The problem</p>
-          <h2>
-            You do not need another dashboard for the same three questions.
-          </h2>
+          <h2>You should not need a browser round-trip for routine revenue ops.</h2>
           <p>
-            Founders keep opening Stripe to check today&apos;s revenue, current
-            MRR, and whether failed payments are slipping through. That workflow
-            is heavier than the job.
+            Revcast is built for the checks you repeat every day inside a
+            SaaS business: revenue today, MRR right now, what is failing, and
+            which Stripe workspace you are currently operating.
           </p>
         </div>
 
@@ -164,10 +186,10 @@ export default function HomePage() {
       <section className="section section-grid">
         <div className="section-head">
           <p className="eyebrow">The product</p>
-          <h2>Revcast gives you the revenue check-in you actually need.</h2>
+          <h2>One extension, four commands, and a much cleaner founder loop.</h2>
           <p>
-            Clean enough for daily use. Focused enough to stay out of your way.
-            Sharp enough to catch money problems before they compound.
+            Every screen is focused on a concrete job to be done, which is why
+            Revcast feels fast instead of dashboard-like.
           </p>
         </div>
 
@@ -186,13 +208,50 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="section section-grid screenshot-section" id="screens">
+        <div className="section-head">
+          <p className="eyebrow">Inside the extension</p>
+          <h2>Real Raycast screens, not marketing mockups.</h2>
+          <p>
+            These are the actual flows founders use inside Revcast, from the
+            first snapshot to onboarding, project switching, failed payment
+            follow-up, and license management.
+          </p>
+        </div>
+
+        <div className="showcase-grid">
+          {screenshots.map((shot) => (
+            <article key={shot.title} className="showcase-card">
+              <div className="showcase-card__meta">
+                <span className="showcase-card__command">{shot.command}</span>
+                <span className="showcase-card__label">{shot.title}</span>
+              </div>
+
+              <div className="showcase-card__media">
+                <Image
+                  src={shot.image}
+                  alt={shot.alt}
+                  className="showcase-card__image"
+                  sizes="(max-width: 1080px) 100vw, 50vw"
+                />
+              </div>
+
+              <div className="showcase-card__copy">
+                <h3>{shot.title}</h3>
+                <p>{shot.description}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="section workflow-section" id="workflow">
         <div className="section-head">
           <p className="eyebrow">The workflow</p>
-          <h2>Built for the way founders already work.</h2>
+          <h2>Built around the existing Raycast habit.</h2>
           <p>
-            Faster than opening Stripe. Cleaner than another dashboard. Good
-            software should feel this obvious.
+            Revcast wins by staying close to the keyboard and only asking you
+            to open Stripe when a deeper action is actually necessary.
           </p>
         </div>
 
@@ -210,14 +269,11 @@ export default function HomePage() {
       <section className="section pricing-section" id="pricing">
         <div className="section-head">
           <p className="eyebrow">Pricing</p>
-          <h2>
-            Start free. Upgrade when revenue visibility becomes
-            mission-critical.
-          </h2>
+          <h2>Start free, then unlock Pro when one workspace stops being enough.</h2>
           <p>
-            Every missed payment costs more than the upgrade. Global billing
-            runs through Dodo Payments, and Pro unlocks unlimited local
-            workspaces on this device.
+            The free plan covers the core founder workflow. Pro adds unlimited
+            local Stripe projects plus the full license and billing experience
+            for operators who manage more than one business context.
           </p>
         </div>
 
@@ -274,15 +330,20 @@ export default function HomePage() {
       <section className="section faq-section" id="faq">
         <div className="section-head">
           <p className="eyebrow">FAQ</p>
-          <h2>Simple product. Honest answers.</h2>
+          <h2>Clear answers for how Revcast actually works.</h2>
         </div>
 
-        <div className="faq-grid">
-          {faqItems.map((item) => (
-            <article key={item.question} className="faq-card">
-              <h3>{item.question}</h3>
+        <div className="faq-stack">
+          {faqItems.map((item, index) => (
+            <details key={item.question} className="faq-item" open={index === 0}>
+              <summary>
+                <span>{item.question}</span>
+                <span className="faq-item__icon" aria-hidden="true">
+                  +
+                </span>
+              </summary>
               <p>{item.answer}</p>
-            </article>
+            </details>
           ))}
         </div>
       </section>
@@ -290,10 +351,10 @@ export default function HomePage() {
       <section className="section final-cta">
         <div className="final-cta__panel">
           <p className="eyebrow">Stay in control</p>
-          <h2>Stay close to revenue without living in dashboards.</h2>
+          <h2>Keep Stripe one command away, not one more tab away.</h2>
           <p>
-            Install Revcast free, then upgrade when you want a tighter command
-            center for revenue ops.
+            Install Revcast free, connect a project or start in demo mode, and
+            upgrade to Pro when you want unlimited workspaces on this device.
           </p>
 
           <div className="button-row">
@@ -304,8 +365,46 @@ export default function HomePage() {
               className="button button-secondary"
               href={`mailto:${siteConfig.supportEmail}`}
             >
-              Talk to the founder
+              Email Bharath
             </a>
+          </div>
+        </div>
+      </section>
+
+      <section className="section contact-section" id="contact">
+        <div className="contact-panel">
+          <div className="contact-panel__copy">
+            <p className="eyebrow">Contact</p>
+            <h2>Questions, feedback, or launch support?</h2>
+            <p>
+              Revcast is built by Bharath for founders who want faster revenue
+              visibility inside Raycast. Reach out directly through any of the
+              channels below.
+            </p>
+          </div>
+
+          <div className="contact-grid">
+            {contactLinks.map((item) =>
+              "href" in item ? (
+                <a
+                  key={item.label}
+                  className="contact-card"
+                  href={item.href}
+                  target={item.href.startsWith("http") ? "_blank" : undefined}
+                  rel={item.href.startsWith("http") ? "noreferrer" : undefined}
+                >
+                  <span className="contact-card__label">{item.label}</span>
+                  <strong>{item.value}</strong>
+                  <p>{item.note}</p>
+                </a>
+              ) : (
+                <article key={item.label} className="contact-card">
+                  <span className="contact-card__label">{item.label}</span>
+                  <strong>{item.value}</strong>
+                  <p>{item.note}</p>
+                </article>
+              ),
+            )}
           </div>
         </div>
       </section>
