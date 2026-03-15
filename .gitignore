@@ -5,3 +5,9 @@ dist
 .data
 .DS_Store
 docs/
+.env
+.env.local
+.env.*.local
+website/.env
+website/.env.local
+website/.env.*.local

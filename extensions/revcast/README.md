@@ -191,7 +191,9 @@ For this flow to work end-to-end you need:
 
 - `DODO_PAYMENTS_API_KEY`
 - `DODO_PAYMENTS_WEBHOOK_KEY`
-- `DODO_PRODUCT_ID_PRO`
+- `DODO_PRODUCT_ID_PRO_MONTHLY`
+- `DODO_PRODUCT_ID_PRO_LIFETIME`
+- `DODO_PRODUCT_ID_PRO_YEARLY` (optional, when yearly checkout is ready)
 - a persistent `DATABASE_URL` for the website workspace
 
 Products in Dodo should have license keys enabled. The Raycast extension uses the `License & Billing` command to activate a purchased Pro license on the current device.

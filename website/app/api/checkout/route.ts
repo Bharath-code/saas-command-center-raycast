@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
 
-import type { PaidPlan } from "../../../lib/content";
+import type { CheckoutPlan } from "../../../lib/content";
 import { siteConfig } from "../../../lib/content";
-import { getDodoClient, getPaidProductId } from "../../../lib/dodo";
+import { getCheckoutProductId, getDodoClient } from "../../../lib/dodo";
 
 export const runtime = "nodejs";
 
-function isPaidPlan(value: unknown): value is PaidPlan {
-  return value === "pro";
+function isCheckoutPlan(value: unknown): value is CheckoutPlan {
+  return (
+    value === "pro_monthly" ||
+    value === "pro_yearly" ||
+    value === "pro_lifetime"
+  );
 }
 
 export async function POST(request: Request) {
@@ -17,14 +21,14 @@ export async function POST(request: Request) {
     } | null;
     const plan = payload?.plan;
 
-    if (!isPaidPlan(plan)) {
+    if (!isCheckoutPlan(plan)) {
       return NextResponse.json(
         { error: "Please choose a valid plan." },
         { status: 400 },
       );
     }
 
-    const productId = getPaidProductId(plan);
+    const productId = getCheckoutProductId(plan);
 
     if (!productId) {
       return NextResponse.json(

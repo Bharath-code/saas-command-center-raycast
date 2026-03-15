@@ -11,7 +11,14 @@ export default async function CheckoutSuccessPage({
 }: CheckoutSuccessPageProps) {
   const params = await searchParams;
   const status = params.status ?? "pending";
-  const plan = params.plan === "pro" ? "Pro" : "your plan";
+  const plan =
+    params.plan === "pro_monthly"
+      ? "Pro Monthly"
+      : params.plan === "pro_yearly"
+        ? "Pro Yearly"
+        : params.plan === "pro_lifetime"
+          ? "Lifetime"
+          : "your plan";
   const isSucceeded = status === "succeeded";
 
   return (

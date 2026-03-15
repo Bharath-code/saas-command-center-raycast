@@ -1,4 +1,5 @@
 export type PaidPlan = "pro";
+export type CheckoutPlan = "pro_monthly" | "pro_yearly" | "pro_lifetime";
 
 export const siteConfig = {
   name: "Revcast",
@@ -150,11 +151,11 @@ export const pricingPlans = [
     kind: "link" as const,
   },
   {
-    name: "Pro",
-    price: "$12",
+    name: "Pro Monthly",
+    price: "$5",
     cadence: "/mo",
     description:
-      "For operators who manage multiple workspaces and want the full license, billing, and project-switching workflow.",
+      "Launch pricing for founders who want unlimited local workspaces and the full license plus billing workflow.",
     features: [
       "Unlimited local Stripe projects",
       "Device license activation",
@@ -163,8 +164,24 @@ export const pricingPlans = [
     ],
     ctaLabel: "Unlock Pro",
     kind: "checkout" as const,
-    plan: "pro" as PaidPlan,
+    checkoutPlan: "pro_monthly" as CheckoutPlan,
     featured: true,
+  },
+  {
+    name: "Lifetime",
+    price: "$59",
+    cadence: " one-time",
+    description:
+      "A one-time early-adopter purchase for founders who want Pro without another monthly software bill.",
+    features: [
+      "Unlimited local Stripe projects",
+      "Device license activation",
+      "No recurring subscription",
+      "Priority roadmap access",
+    ],
+    ctaLabel: "Buy lifetime",
+    kind: "checkout" as const,
+    checkoutPlan: "pro_lifetime" as CheckoutPlan,
   },
 ] as const;
 
@@ -197,7 +214,7 @@ export const faqItems = [
   {
     question: "How does payment and licensing work?",
     answer:
-      "Checkout is handled through Dodo Payments on the website, then the purchased plan is activated from the `license` command inside Raycast. From there you can refresh status, open the billing portal, replace an activation, or release the current device when needed.",
+      "Checkout is handled through Dodo Payments on the website, then the purchased monthly or lifetime plan is activated from the `license` command inside Raycast. From there you can refresh status, manage activations, and for subscription purchases open the billing portal when needed.",
   },
 ] as const;
 

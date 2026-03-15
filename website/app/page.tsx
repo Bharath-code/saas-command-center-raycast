@@ -36,9 +36,15 @@ const jsonLd = {
     },
     {
       "@type": "Offer",
-      price: "12",
+      price: "5",
       priceCurrency: "USD",
-      description: "Pro plan",
+      description: "Pro Monthly plan",
+    },
+    {
+      "@type": "Offer",
+      price: "59",
+      priceCurrency: "USD",
+      description: "Lifetime plan",
     },
   ],
 };
@@ -271,9 +277,9 @@ export default function HomePage() {
           <p className="eyebrow">Pricing</p>
           <h2>Start free, then unlock Pro when one workspace stops being enough.</h2>
           <p>
-            The free plan covers the core founder workflow. Pro adds unlimited
-            local Stripe projects plus the full license and billing experience
-            for operators who manage more than one business context.
+            The launch pricing stays simple: free for one local Stripe
+            project, $5/month for ongoing Pro access, or a one-time lifetime
+            purchase for founders who would rather skip another subscription.
           </p>
         </div>
 
@@ -295,7 +301,7 @@ export default function HomePage() {
                     </h3>
                   </div>
                   {isFeatured ? (
-                    <span className="pricing-card__pill">Most focused</span>
+                    <span className="pricing-card__pill">Launch price</span>
                   ) : null}
                 </div>
 
@@ -318,7 +324,7 @@ export default function HomePage() {
                   <CheckoutButton
                     featured={isFeatured}
                     label={plan.ctaLabel}
-                    plan={plan.plan}
+                    plan={plan.checkoutPlan}
                   />
                 )}
               </article>

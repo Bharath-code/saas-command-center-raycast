@@ -2,11 +2,11 @@
 
 import { useState, useTransition } from "react";
 
-import type { PaidPlan } from "../lib/content";
+import type { CheckoutPlan } from "../lib/content";
 
 type CheckoutButtonProps = {
   label: string;
-  plan: PaidPlan;
+  plan: CheckoutPlan;
   featured?: boolean;
 };
 
