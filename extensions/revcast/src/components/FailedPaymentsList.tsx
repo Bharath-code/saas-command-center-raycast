@@ -1,22 +1,9 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Color,
-  Icon,
-  List,
-  Toast,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 
 import { isAbortError } from "../lib/cache";
 import { formatCurrency, formatRetryLabel } from "../lib/formatters";
-import {
-  getReviewedFailedPaymentIds,
-  markFailedPaymentReviewed,
-  markFailedPaymentUnreviewed,
-} from "../lib/storage";
+import { getReviewedFailedPaymentIds, markFailedPaymentReviewed, markFailedPaymentUnreviewed } from "../lib/storage";
 import { getFailedPayments } from "../lib/stripe-metrics-service";
 import { FailedPayment, StripeProject } from "../lib/types";
 
@@ -27,9 +14,7 @@ type FailedPaymentsListProps = {
 const EMPTY_STATE_RETRY_DELAYS_MS = [1500, 3000];
 
 function sortFailedPayments(payments: FailedPayment[]) {
-  return [...payments].sort(
-    (left, right) => Number(left.reviewed) - Number(right.reviewed),
-  );
+  return [...payments].sort((left, right) => Number(left.reviewed) - Number(right.reviewed));
 }
 
 function waitWithAbort(delayMs: number, signal: AbortSignal) {
@@ -55,10 +40,7 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
   const requestIdRef = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  async function loadPayments(options?: {
-    showSuccessToast?: boolean;
-    forceRefresh?: boolean;
-  }) {
+  async function loadPayments(options?: { showSuccessToast?: boolean; forceRefresh?: boolean }) {
     abortControllerRef.current?.abort();
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
@@ -68,11 +50,7 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
     setError(null);
 
     try {
-      for (
-        let attempt = 0;
-        attempt <= EMPTY_STATE_RETRY_DELAYS_MS.length;
-        attempt++
-      ) {
+      for (let attempt = 0; attempt <= EMPTY_STATE_RETRY_DELAYS_MS.length; attempt++) {
         const [livePayments, reviewedIds] = await Promise.all([
           getFailedPayments(props.project, {
             signal: abortController.signal,
@@ -81,10 +59,7 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
           getReviewedFailedPaymentIds(),
         ]);
 
-        if (
-          abortController.signal.aborted ||
-          requestId !== requestIdRef.current
-        ) {
+        if (abortController.signal.aborted || requestId !== requestIdRef.current) {
           return;
         }
 
@@ -103,10 +78,7 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
           attempt < EMPTY_STATE_RETRY_DELAYS_MS.length;
 
         if (shouldRetryEmptyState) {
-          await waitWithAbort(
-            EMPTY_STATE_RETRY_DELAYS_MS[attempt],
-            abortController.signal,
-          );
+          await waitWithAbort(EMPTY_STATE_RETRY_DELAYS_MS[attempt], abortController.signal);
           continue;
         }
 
@@ -126,11 +98,7 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
         return;
       }
 
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "Couldn't load failed payments.",
-      );
+      setError(loadError instanceof Error ? loadError.message : "Couldn't load failed payments.");
     } finally {
       if (requestId === requestIdRef.current) {
         setIsLoading(false);
@@ -159,30 +127,20 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
     setPayments((currentPayments) =>
       sortFailedPayments(
         currentPayments.map((currentPayment) =>
-          currentPayment.id === payment.id
-            ? { ...currentPayment, reviewed: !currentPayment.reviewed }
-            : currentPayment,
+          currentPayment.id === payment.id ? { ...currentPayment, reviewed: !currentPayment.reviewed } : currentPayment,
         ),
       ),
     );
   }
 
-  const revenueAtRisk = payments.reduce(
-    (total, payment) => total + payment.amount,
-    0,
-  );
-  const isEmptyStripeAccount =
-    !payments.length && props.project.secretKey.startsWith("sk_test_");
+  const revenueAtRisk = payments.reduce((total, payment) => total + payment.amount, 0);
+  const isEmptyStripeAccount = !payments.length && props.project.secretKey.startsWith("sk_test_");
 
   if (!isLoading && !payments.length && !error) {
     return (
       <List navigationTitle="Failed Payments">
         <List.EmptyView
-          title={
-            isEmptyStripeAccount
-              ? "No failed payments found in Stripe Test mode"
-              : "No failed payments today"
-          }
+          title={isEmptyStripeAccount ? "No failed payments found in Stripe Test mode" : "No failed payments today"}
           description={
             isEmptyStripeAccount
               ? "If this is a new test account, add some test invoices or payment attempts in Stripe and refresh."
@@ -200,10 +158,7 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
                   })
                 }
               />
-              <Action.OpenInBrowser
-                title="Open Stripe Dashboard"
-                url={props.project.dashboardUrl}
-              />
+              <Action.OpenInBrowser title="Open Stripe Dashboard" url={props.project.dashboardUrl} />
             </ActionPanel>
           }
         />
@@ -233,50 +188,31 @@ export function FailedPaymentsList(props: FailedPaymentsListProps) {
           }
         />
       ) : null}
-      <List.Section
-        title="Revenue Risk"
-        subtitle={`${payments.length} customers • ${formatCurrency(revenueAtRisk)}`}
-      >
+      <List.Section title="Revenue Risk" subtitle={`${payments.length} customers • ${formatCurrency(revenueAtRisk)}`}>
         {payments.map((payment) => (
           <List.Item
             key={payment.id}
-            icon={
-              payment.reviewed
-                ? { source: Icon.CheckCircle, tintColor: Color.Green }
-                : Icon.ExclamationMark
-            }
+            icon={payment.reviewed ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.ExclamationMark}
             title={`${payment.customerName} — ${formatCurrency(payment.amount, payment.currency)}`}
             subtitle={formatRetryLabel(payment.retryAt)}
             accessories={[
               {
-                tag: payment.reviewed
-                  ? "Reviewed"
-                  : payment.status === "retrying"
-                    ? "Retry Pending"
-                    : "Final Failure",
-                icon:
-                  payment.status === "retrying"
-                    ? Icon.ArrowClockwise
-                    : Icon.XMarkCircle,
+                tag: payment.reviewed ? "Reviewed" : payment.status === "retrying" ? "Retry Pending" : "Final Failure",
+                icon: payment.status === "retrying" ? Icon.ArrowClockwise : Icon.XMarkCircle,
               },
               { text: payment.reason },
             ]}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action.OpenInBrowser
-                    title="Open in Stripe"
-                    url={payment.stripeUrl}
-                  />
+                  <Action.OpenInBrowser title="Open in Stripe" url={payment.stripeUrl} />
                   <Action
                     title="Copy Email"
                     icon={Icon.Clipboard}
                     onAction={() => Clipboard.copy(payment.customerEmail)}
                   />
                   <Action
-                    title={
-                      payment.reviewed ? "Mark Unreviewed" : "Mark Reviewed"
-                    }
+                    title={payment.reviewed ? "Mark Unreviewed" : "Mark Reviewed"}
                     icon={payment.reviewed ? Icon.Undo : Icon.Check}
                     onAction={() => void handleToggleReviewed(payment)}
                   />

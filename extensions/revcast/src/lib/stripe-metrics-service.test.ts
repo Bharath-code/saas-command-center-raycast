@@ -95,10 +95,7 @@ describe("calculatePercentDelta", () => {
 describe("buildRevenueSnapshot", () => {
   it("builds the full snapshot from raw Stripe data", () => {
     const snapshot = buildRevenueSnapshot({
-      subscriptions: [
-        createSubscription(9900, "month"),
-        createSubscription(120000, "year"),
-      ],
+      subscriptions: [createSubscription(9900, "month"), createSubscription(120000, "year")],
       todayPaymentIntents: [
         {
           status: "succeeded",

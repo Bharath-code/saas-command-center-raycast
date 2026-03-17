@@ -6,11 +6,7 @@ import {
   deactivateLicense as deactivateRemoteLicense,
   validateLicense as validateRemoteLicense,
 } from "../lib/license-service";
-import {
-  clearLicenseState,
-  getLicenseState,
-  saveLicenseState,
-} from "../lib/storage";
+import { clearLicenseState, getLicenseState, saveLicenseState } from "../lib/storage";
 import { LicenseState } from "../lib/types";
 
 export function useLicense() {
@@ -28,10 +24,7 @@ export function useLicense() {
     void reload();
   }, []);
 
-  async function activateLicense(input: {
-    instanceName: string;
-    licenseKey: string;
-  }) {
+  async function activateLicense(input: { instanceName: string; licenseKey: string }) {
     const activation = await activateRemoteLicense(input);
     const nextLicense: LicenseState = {
       customerEmail: activation.customerEmail,
@@ -65,8 +58,7 @@ export function useLicense() {
       licenseStatus: validation.licenseStatus ?? license.licenseStatus,
       plan: validation.plan ?? license.plan,
       status: validation.valid ? "active" : "invalid",
-      subscriptionStatus:
-        validation.subscriptionStatus ?? license.subscriptionStatus,
+      subscriptionStatus: validation.subscriptionStatus ?? license.subscriptionStatus,
       updatedAt: new Date().toISOString(),
     };
 

@@ -12,23 +12,16 @@ import { ProjectInput, StripeProject } from "../lib/types";
 
 export function useProjects() {
   const [projects, setProjects] = useState<StripeProject[]>([]);
-  const [activeProjectId, setActiveProjectIdState] = useState<string | null>(
-    null,
-  );
+  const [activeProjectId, setActiveProjectIdState] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   async function reload() {
     setIsLoading(true);
 
-    const [storedProjects, storedActiveProjectId] = await Promise.all([
-      getProjects(),
-      getActiveProjectId(),
-    ]);
+    const [storedProjects, storedActiveProjectId] = await Promise.all([getProjects(), getActiveProjectId()]);
 
     setProjects(storedProjects);
-    setActiveProjectIdState(
-      storedActiveProjectId ?? storedProjects[0]?.id ?? null,
-    );
+    setActiveProjectIdState(storedActiveProjectId ?? storedProjects[0]?.id ?? null);
     setIsLoading(false);
   }
 
@@ -60,8 +53,7 @@ export function useProjects() {
 
   return {
     projects,
-    activeProject:
-      projects.find((project) => project.id === activeProjectId) ?? null,
+    activeProject: projects.find((project) => project.id === activeProjectId) ?? null,
     isLoading,
     reload,
     saveProject,

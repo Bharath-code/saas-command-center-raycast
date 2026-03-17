@@ -32,10 +32,7 @@ export async function addProject(input: ProjectInput) {
     id: randomUUID(),
     name: input.name.trim(),
     secretKey: input.secretKey.trim(),
-    dashboardUrl: inferDashboardUrl(
-      input.secretKey.trim(),
-      input.dashboardUrl?.trim(),
-    ),
+    dashboardUrl: inferDashboardUrl(input.secretKey.trim(), input.dashboardUrl?.trim()),
     createdAt: now,
     updatedAt: now,
   };
@@ -50,10 +47,7 @@ export async function addProject(input: ProjectInput) {
     );
   }
 
-  const nextProjects = [
-    ...projects.filter((item) => item.id !== project.id),
-    project,
-  ];
+  const nextProjects = [...projects.filter((item) => item.id !== project.id), project];
 
   await saveProjects(nextProjects);
   await setActiveProjectId(project.id);
@@ -87,25 +81,18 @@ export async function setActiveProjectId(projectId: ProjectId | null) {
 }
 
 export async function getActiveProject() {
-  const [projects, activeProjectId] = await Promise.all([
-    getProjects(),
-    getActiveProjectId(),
-  ]);
+  const [projects, activeProjectId] = await Promise.all([getProjects(), getActiveProjectId()]);
 
   if (!projects.length) {
     return null;
   }
 
-  return (
-    projects.find((project) => project.id === activeProjectId) ?? projects[0]
-  );
+  return projects.find((project) => project.id === activeProjectId) ?? projects[0];
 }
 
 export async function ensureDemoProject() {
   const projects = await getProjects();
-  const existingDemo = projects.find(
-    (project) => project.id === DEMO_PROJECT_ID,
-  );
+  const existingDemo = projects.find((project) => project.id === DEMO_PROJECT_ID);
 
   if (existingDemo) {
     await setActiveProjectId(existingDemo.id);
@@ -130,9 +117,7 @@ export async function ensureDemoProject() {
 }
 
 export async function getReviewedFailedPaymentIds() {
-  const rawIds = await LocalStorage.getItem<string>(
-    REVIEWED_FAILED_PAYMENTS_KEY,
-  );
+  const rawIds = await LocalStorage.getItem<string>(REVIEWED_FAILED_PAYMENTS_KEY);
 
   if (!rawIds) {
     return [];

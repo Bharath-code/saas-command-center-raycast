@@ -62,12 +62,7 @@ type StripeErrorResponse = {
   };
 };
 
-type StripeQueryValue =
-  | string
-  | number
-  | boolean
-  | Array<string | number | boolean>
-  | undefined;
+type StripeQueryValue = string | number | boolean | Array<string | number | boolean> | undefined;
 
 function createQueryString(query?: Record<string, StripeQueryValue>) {
   if (!query) {
@@ -101,25 +96,22 @@ async function stripeRequest<T>(
   query?: Record<string, StripeQueryValue>,
   options?: StripeRequestOptions,
 ) {
-  const response = await fetch(
-    `https://api.stripe.com${path}${createQueryString(query)}`,
-    {
-      headers: {
-        Authorization: `Bearer ${secretKey}`,
-      },
-      signal: options?.signal,
+  const response = await fetch(`https://api.stripe.com${path}${createQueryString(query)}`, {
+    headers: {
+      Authorization: `Bearer ${secretKey}`,
     },
-  );
+    signal: options?.signal,
+  });
 
   if (!response.ok) {
-    const errorBody = (await response
-      .json()
-      .catch(() => ({}))) as StripeErrorResponse;
+    const errorBody = (await response.json().catch(() => ({}))) as StripeErrorResponse;
     throw new Error(errorBody.error?.message ?? "Stripe request failed");
   }
 
   return (await response.json()) as T;
 }
+
+const MAX_PAGES = 10;
 
 async function stripeList<T extends { id: string }>(
   secretKey: string,
@@ -130,8 +122,10 @@ async function stripeList<T extends { id: string }>(
   const items: T[] = [];
   let hasMore = true;
   let startingAfter: string | undefined;
+  let pageCount = 0;
 
-  while (hasMore) {
+  while (hasMore && pageCount < MAX_PAGES) {
+    pageCount++;
     options?.signal?.throwIfAborted();
 
     const response = await stripeRequest<StripeListResponse<T>>(
@@ -157,16 +151,8 @@ async function stripeList<T extends { id: string }>(
   return items;
 }
 
-export function listSubscriptions(
-  secretKey: string,
-  options?: StripeRequestOptions,
-) {
-  return stripeList<StripeSubscription>(
-    secretKey,
-    "/v1/subscriptions",
-    { status: "all" },
-    options,
-  );
+export function listSubscriptions(secretKey: string, options?: StripeRequestOptions) {
+  return stripeList<StripeSubscription>(secretKey, "/v1/subscriptions", { status: "all" }, options);
 }
 
 export function listPaymentIntents(
@@ -201,10 +187,7 @@ export function listCustomers(
   );
 }
 
-export function listOpenInvoices(
-  secretKey: string,
-  options?: StripeRequestOptions,
-) {
+export function listOpenInvoices(secretKey: string, options?: StripeRequestOptions) {
   return stripeList<StripeInvoice>(
     secretKey,
     "/v1/invoices",

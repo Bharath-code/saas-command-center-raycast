@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 
 import { ProjectInput, StripeProject } from "../lib/types";
@@ -24,9 +17,7 @@ export function ProjectForm(props: ProjectFormProps) {
   const { pop } = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
   const [secretKeyError, setSecretKeyError] = useState<string | undefined>();
-  const [dashboardUrlError, setDashboardUrlError] = useState<
-    string | undefined
-  >();
+  const [dashboardUrlError, setDashboardUrlError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(values: FormValues) {
@@ -48,10 +39,7 @@ export function ProjectForm(props: ProjectFormProps) {
       hasError = true;
     }
 
-    if (
-      projectInput.dashboardUrl &&
-      !projectInput.dashboardUrl.startsWith("https://dashboard.stripe.com")
-    ) {
+    if (projectInput.dashboardUrl && !projectInput.dashboardUrl.startsWith("https://dashboard.stripe.com")) {
       setDashboardUrlError("Use a Stripe dashboard URL.");
       hasError = true;
     }

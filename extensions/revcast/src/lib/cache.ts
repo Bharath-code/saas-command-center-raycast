@@ -18,11 +18,7 @@ export async function withShortLivedCache<T>(
   const existingEntry = cache.get(key) as CacheEntry<T> | undefined;
   const now = Date.now();
 
-  if (
-    !options.forceRefresh &&
-    existingEntry?.value !== undefined &&
-    existingEntry.expiresAt > now
-  ) {
+  if (!options.forceRefresh && existingEntry?.value !== undefined && existingEntry.expiresAt > now) {
     return existingEntry.value;
   }
 

@@ -1,21 +1,11 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 
 import { LicenseState } from "../lib/types";
 
 type LicenseFormProps = {
   initialLicense?: LicenseState | null;
-  onDidSave: (input: {
-    instanceName: string;
-    licenseKey: string;
-  }) => Promise<unknown>;
+  onDidSave: (input: { instanceName: string; licenseKey: string }) => Promise<unknown>;
 };
 
 type FormValues = {
@@ -25,9 +15,7 @@ type FormValues = {
 
 export function LicenseForm({ initialLicense, onDidSave }: LicenseFormProps) {
   const { pop } = useNavigation();
-  const [instanceNameError, setInstanceNameError] = useState<
-    string | undefined
-  >();
+  const [instanceNameError, setInstanceNameError] = useState<string | undefined>();
   const [licenseKeyError, setLicenseKeyError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 

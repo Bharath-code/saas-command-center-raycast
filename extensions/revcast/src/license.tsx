@@ -13,11 +13,7 @@ import {
 
 import { LicenseForm } from "./components/LicenseForm";
 import { useLicense } from "./hooks/useLicense";
-import {
-  getLicenseConfigurationError,
-  getPricingUrl,
-  isLicenseBackendConfigured,
-} from "./lib/license-service";
+import { getLicenseConfigurationError, getPricingUrl, isLicenseBackendConfigured } from "./lib/license-service";
 
 function getLicenseMarkdown() {
   return `# Unlock Pro
@@ -81,15 +77,11 @@ export default function LicenseCommand() {
       const nextLicense = await license.refreshLicense();
 
       toast.style = Toast.Style.Success;
-      toast.title =
-        nextLicense?.status === "active"
-          ? "License is active"
-          : "License needs attention";
+      toast.title = nextLicense?.status === "active" ? "License is active" : "License needs attention";
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Couldn't refresh license";
-      toast.message =
-        error instanceof Error ? error.message : "Please try again.";
+      toast.message = error instanceof Error ? error.message : "Please try again.";
     }
   }
 
@@ -182,12 +174,7 @@ export default function LicenseCommand() {
               <Action.Push
                 title={activeLicense ? "Replace License" : "Activate License"}
                 icon={Icon.Key}
-                target={
-                  <LicenseForm
-                    initialLicense={activeLicense}
-                    onDidSave={license.activateLicense}
-                  />
-                }
+                target={<LicenseForm initialLicense={activeLicense} onDidSave={license.activateLicense} />}
               />
             ) : (
               <Action
@@ -196,17 +183,9 @@ export default function LicenseCommand() {
                 onAction={() => void openExtensionPreferences()}
               />
             )}
-            <Action
-              title="Refresh License"
-              icon={Icon.ArrowClockwise}
-              onAction={() => void handleRefresh()}
-            />
+            <Action title="Refresh License" icon={Icon.ArrowClockwise} onAction={() => void handleRefresh()} />
             {pricingUrl ? (
-              <Action.OpenInBrowser
-                title="See Plans"
-                icon={Icon.Store}
-                url={pricingUrl}
-              />
+              <Action.OpenInBrowser title="See Plans" icon={Icon.Store} url={pricingUrl} />
             ) : (
               <Action
                 title="Why Billing Is Disabled"
@@ -221,11 +200,7 @@ export default function LicenseCommand() {
               />
             )}
             {activeLicense ? (
-              <Action
-                title="Open Billing Portal"
-                icon={Icon.Link}
-                onAction={() => void handleOpenPortal()}
-              />
+              <Action title="Open Billing Portal" icon={Icon.Link} onAction={() => void handleOpenPortal()} />
             ) : null}
           </ActionPanel.Section>
           {activeLicense ? (

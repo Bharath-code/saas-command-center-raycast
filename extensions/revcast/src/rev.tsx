@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Color,
-  Icon,
-  List,
-  Toast,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 
 import { FailedPaymentsList } from "./components/FailedPaymentsList";
@@ -26,10 +17,7 @@ export default function RevenueSnapshotCommand() {
   const requestIdRef = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  async function loadSnapshot(options?: {
-    showSuccessToast?: boolean;
-    forceRefresh?: boolean;
-  }) {
+  async function loadSnapshot(options?: { showSuccessToast?: boolean; forceRefresh?: boolean }) {
     if (!projects.activeProject) {
       return;
     }
@@ -48,10 +36,7 @@ export default function RevenueSnapshotCommand() {
         forceRefresh: options?.forceRefresh,
       });
 
-      if (
-        abortController.signal.aborted ||
-        requestId !== requestIdRef.current
-      ) {
+      if (abortController.signal.aborted || requestId !== requestIdRef.current) {
         return;
       }
 
@@ -68,11 +53,7 @@ export default function RevenueSnapshotCommand() {
         return;
       }
 
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : "Couldn't load revenue metrics.",
-      );
+      setError(loadError instanceof Error ? loadError.message : "Couldn't load revenue metrics.");
     } finally {
       if (requestId === requestIdRef.current) {
         setIsLoadingSnapshot(false);
@@ -96,12 +77,7 @@ export default function RevenueSnapshotCommand() {
   }, [projects.activeProject?.id]);
 
   if (!projects.isLoading && !projects.activeProject) {
-    return (
-      <OnboardingDetail
-        onDidSaveProject={projects.saveProject}
-        onUseDemo={projects.enableDemoProject}
-      />
-    );
+    return <OnboardingDetail onDidSaveProject={projects.saveProject} onUseDemo={projects.enableDemoProject} />;
   }
 
   function copySnapshot() {
@@ -175,10 +151,7 @@ export default function RevenueSnapshotCommand() {
                   />
                   <Action.OpenInBrowser
                     title="Open Stripe Dashboard"
-                    url={
-                      projects.activeProject?.dashboardUrl ??
-                      "https://dashboard.stripe.com"
-                    }
+                    url={projects.activeProject?.dashboardUrl ?? "https://dashboard.stripe.com"}
                   />
                   <Action
                     title="Use Demo Metrics"
@@ -189,20 +162,14 @@ export default function RevenueSnapshotCommand() {
               }
             />
           ) : null}
-          <List.Section
-            title="Revenue Metrics"
-            subtitle={`Stripe • ${projects.activeProject?.name ?? "Project"}`}
-          >
+          <List.Section title="Revenue Metrics" subtitle={`Stripe • ${projects.activeProject?.name ?? "Project"}`}>
             <List.Item
               icon={{ source: Icon.Coins, tintColor: Color.Green }}
               title="Today Revenue"
               subtitle={snapshot.todayRevenueContext}
               accessories={[
                 {
-                  text: formatCurrency(
-                    snapshot.todayRevenue,
-                    snapshot.currency,
-                  ),
+                  text: formatCurrency(snapshot.todayRevenue, snapshot.currency),
                 },
               ]}
               actions={
@@ -217,24 +184,15 @@ export default function RevenueSnapshotCommand() {
                       })
                     }
                   />
-                  <Action
-                    title="Copy Snapshot"
-                    icon={Icon.Clipboard}
-                    onAction={copySnapshot}
-                  />
+                  <Action title="Copy Snapshot" icon={Icon.Clipboard} onAction={copySnapshot} />
                   <Action.OpenInBrowser
                     title="Open Stripe Dashboard"
-                    url={
-                      projects.activeProject?.dashboardUrl ??
-                      "https://dashboard.stripe.com"
-                    }
+                    url={projects.activeProject?.dashboardUrl ?? "https://dashboard.stripe.com"}
                   />
                   {projects.activeProject ? (
                     <Action.Push
                       title="View Failed Payments"
-                      target={
-                        <FailedPaymentsList project={projects.activeProject} />
-                      }
+                      target={<FailedPaymentsList project={projects.activeProject} />}
                     />
                   ) : null}
                 </ActionPanel>
@@ -244,9 +202,7 @@ export default function RevenueSnapshotCommand() {
               icon={{ source: Icon.LineChart, tintColor: Color.Blue }}
               title="Monthly Recurring Revenue"
               subtitle={snapshot.mrrContext}
-              accessories={[
-                { text: formatCurrency(snapshot.mrr, snapshot.currency) },
-              ]}
+              accessories={[{ text: formatCurrency(snapshot.mrr, snapshot.currency) }]}
               actions={
                 <ActionPanel>
                   <Action
@@ -259,11 +215,7 @@ export default function RevenueSnapshotCommand() {
                       })
                     }
                   />
-                  <Action
-                    title="Copy Snapshot"
-                    icon={Icon.Clipboard}
-                    onAction={copySnapshot}
-                  />
+                  <Action title="Copy Snapshot" icon={Icon.Clipboard} onAction={copySnapshot} />
                 </ActionPanel>
               }
             />
@@ -284,11 +236,7 @@ export default function RevenueSnapshotCommand() {
                       })
                     }
                   />
-                  <Action
-                    title="Copy Snapshot"
-                    icon={Icon.Clipboard}
-                    onAction={copySnapshot}
-                  />
+                  <Action title="Copy Snapshot" icon={Icon.Clipboard} onAction={copySnapshot} />
                 </ActionPanel>
               }
             />
@@ -311,24 +259,15 @@ export default function RevenueSnapshotCommand() {
                       })
                     }
                   />
-                  <Action
-                    title="Copy Snapshot"
-                    icon={Icon.Clipboard}
-                    onAction={copySnapshot}
-                  />
+                  <Action title="Copy Snapshot" icon={Icon.Clipboard} onAction={copySnapshot} />
                   <Action.OpenInBrowser
                     title="Open Stripe Dashboard"
-                    url={
-                      projects.activeProject?.dashboardUrl ??
-                      "https://dashboard.stripe.com"
-                    }
+                    url={projects.activeProject?.dashboardUrl ?? "https://dashboard.stripe.com"}
                   />
                   {projects.activeProject ? (
                     <Action.Push
                       title="View Failed Payments"
-                      target={
-                        <FailedPaymentsList project={projects.activeProject} />
-                      }
+                      target={<FailedPaymentsList project={projects.activeProject} />}
                     />
                   ) : null}
                 </ActionPanel>

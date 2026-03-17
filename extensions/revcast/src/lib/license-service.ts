@@ -72,10 +72,7 @@ export function isLicenseBackendConfigured() {
   return Boolean(getConfiguredApiBaseUrl());
 }
 
-export async function activateLicense(input: {
-  instanceName: string;
-  licenseKey: string;
-}) {
+export async function activateLicense(input: { instanceName: string; licenseKey: string }) {
   return postJson<ActivateLicensePayload>("/api/license/activate", input);
 }
 

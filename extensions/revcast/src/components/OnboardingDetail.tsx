@@ -4,9 +4,7 @@ import { ProjectInput, StripeProject } from "../lib/types";
 import { ProjectForm } from "./ProjectForm";
 
 type OnboardingDetailProps = {
-  onDidSaveProject: (
-    input: ProjectInput,
-  ) => Promise<StripeProject> | StripeProject;
+  onDidSaveProject: (input: ProjectInput) => Promise<StripeProject> | StripeProject;
   onUseDemo: () => Promise<unknown>;
 };
 
@@ -37,8 +35,7 @@ export function OnboardingDetail(props: OnboardingDetailProps) {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Couldn't load demo metrics";
-      toast.message =
-        error instanceof Error ? error.message : "Please try again.";
+      toast.message = error instanceof Error ? error.message : "Please try again.";
     }
   }
 
@@ -49,10 +46,7 @@ export function OnboardingDetail(props: OnboardingDetailProps) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.Push
-              title="Connect Stripe"
-              target={<ProjectForm onDidSave={props.onDidSaveProject} />}
-            />
+            <Action.Push title="Connect Stripe" target={<ProjectForm onDidSave={props.onDidSaveProject} />} />
             <Action title="View Demo Metrics" onAction={handleUseDemo} />
           </ActionPanel.Section>
         </ActionPanel>
