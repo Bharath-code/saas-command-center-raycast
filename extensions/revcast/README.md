@@ -194,9 +194,12 @@ For this flow to work end-to-end you need:
 - `DODO_PRODUCT_ID_PRO_MONTHLY`
 - `DODO_PRODUCT_ID_PRO_LIFETIME`
 - `DODO_PRODUCT_ID_PRO_YEARLY` (optional, when yearly checkout is ready)
-- a persistent `DATABASE_URL` for the website workspace
+- a persistent `LIBSQL_DATABASE_URL` for billing and license storage
+- `NEON_DATABASE_URL` for waitlist and admin export storage
 
 Products in Dodo should have license keys enabled. The Raycast extension uses the `License & Billing` command to activate a purchased Pro license on the current device.
+
+If you use the current Neon integration on Vercel, copy its connection string into `NEON_DATABASE_URL`. `POSTGRES_URL` is supported only as a legacy fallback for older setups.
 
 For local development or self-hosting, set the Raycast extension preference `Revcast Cloud URL` to your deployed website URL. Stripe project credentials remain local to the Raycast extension in v1, and the hosted website is used only for checkout plus license APIs.
 

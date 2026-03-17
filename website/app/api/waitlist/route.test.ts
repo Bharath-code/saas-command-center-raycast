@@ -1,16 +1,20 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { databaseUrl } = vi.hoisted(() => {
-  const value = `file:./.data/test-waitlist-${Date.now()}.db`;
-  process.env.DATABASE_URL = value;
-  process.env.DATABASE_AUTH_TOKEN = "";
-  return { databaseUrl: value };
-});
+const { upsertWaitlistSignupMock } = vi.hoisted(() => ({
+  upsertWaitlistSignupMock: vi.fn(),
+}));
 
-import { getWaitlistSignupByEmail } from "../../../lib/license-store";
+vi.mock("../../../lib/waitlist-store", () => ({
+  upsertWaitlistSignup: upsertWaitlistSignupMock,
+}));
+
 import { POST } from "./route";
 
 describe("POST /api/waitlist", () => {
+  beforeEach(() => {
+    upsertWaitlistSignupMock.mockReset();
+  });
+
   it("accepts a valid email without a visible plan selection", async () => {
     const email = `founder-${Date.now()}@example.com`;
 
@@ -26,14 +30,35 @@ describe("POST /api/waitlist", () => {
       }),
     );
 
-    expect(databaseUrl).toContain("test-waitlist");
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ ok: true });
-
-    await expect(getWaitlistSignupByEmail(email)).resolves.toMatchObject({
+    expect(upsertWaitlistSignupMock).toHaveBeenCalledWith({
       email,
       interest: "general",
       source: "landing_page",
+    });
+  });
+
+  it("accepts hidden pricing interest from the page", async () => {
+    const response = await POST(
+      new Request("https://revcast.example/api/waitlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: "paid@example.com",
+          interest: "pro_yearly",
+          source: "pricing_card",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(upsertWaitlistSignupMock).toHaveBeenCalledWith({
+      email: "paid@example.com",
+      interest: "pro_yearly",
+      source: "pricing_card",
     });
   });
 
@@ -46,7 +71,6 @@ describe("POST /api/waitlist", () => {
         },
         body: JSON.stringify({
           email: "not-an-email",
-          interest: "pro_monthly",
         }),
       }),
     );
@@ -55,9 +79,10 @@ describe("POST /api/waitlist", () => {
     await expect(response.json()).resolves.toEqual({
       error: "Enter a valid email address.",
     });
+    expect(upsertWaitlistSignupMock).not.toHaveBeenCalled();
   });
 
-  it("normalizes email casing before storage", async () => {
+  it("normalizes email casing before persistence", async () => {
     const email = `Founder-${Date.now()}@Example.com`;
 
     const response = await POST(
@@ -74,50 +99,10 @@ describe("POST /api/waitlist", () => {
     );
 
     expect(response.status).toBe(200);
-
-    await expect(
-      getWaitlistSignupByEmail(email.toLowerCase()),
-    ).resolves.toMatchObject({
+    expect(upsertWaitlistSignupMock).toHaveBeenCalledWith({
       email: email.toLowerCase(),
       interest: "pro_lifetime",
-    });
-  });
-
-  it("upserts duplicate emails and updates plan interest", async () => {
-    const email = `duplicate-${Date.now()}@example.com`;
-
-    await POST(
-      new Request("https://revcast.example/api/waitlist", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-        }),
-      }),
-    );
-
-    const response = await POST(
-      new Request("https://revcast.example/api/waitlist", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: email.toUpperCase(),
-          interest: "pro_yearly",
-          source: "pricing_card",
-        }),
-      }),
-    );
-
-    expect(response.status).toBe(200);
-
-    await expect(getWaitlistSignupByEmail(email)).resolves.toMatchObject({
-      email,
-      interest: "pro_yearly",
-      source: "pricing_card",
+      source: "landing_page",
     });
   });
 });

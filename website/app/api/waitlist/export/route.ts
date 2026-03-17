@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { hasWaitlistAdminAccess } from "../../../../lib/admin-auth";
-import { listWaitlistSignups } from "../../../../lib/license-store";
+import { listWaitlistSignups } from "../../../../lib/waitlist-store";
 
 export const runtime = "nodejs";
 

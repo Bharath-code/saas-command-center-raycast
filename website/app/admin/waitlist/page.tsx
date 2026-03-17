@@ -1,6 +1,6 @@
 import { hasWaitlistAdminAccess } from "../../../lib/admin-auth";
-import { listWaitlistSignups } from "../../../lib/license-store";
 import { waitlistInterestLabels } from "../../../lib/content";
+import { listWaitlistSignups } from "../../../lib/waitlist-store";
 
 type WaitlistAdminPageProps = {
   searchParams: Promise<{

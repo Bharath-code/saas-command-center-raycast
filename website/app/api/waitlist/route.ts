@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import type { WaitlistInterest } from "../../../lib/content";
-import { upsertWaitlistSignup } from "../../../lib/license-store";
+import { upsertWaitlistSignup } from "../../../lib/waitlist-store";
 
 export const runtime = "nodejs";
 

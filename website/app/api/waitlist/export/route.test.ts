@@ -1,11 +1,22 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 process.env.WAITLIST_ADMIN_TOKEN = "revcast-admin-token";
 
-import { upsertWaitlistSignup } from "../../../../lib/license-store";
+const { listWaitlistSignupsMock } = vi.hoisted(() => ({
+  listWaitlistSignupsMock: vi.fn(),
+}));
+
+vi.mock("../../../../lib/waitlist-store", () => ({
+  listWaitlistSignups: listWaitlistSignupsMock,
+}));
+
 import { GET } from "./route";
 
 describe("GET /api/waitlist/export", () => {
+  beforeEach(() => {
+    listWaitlistSignupsMock.mockReset();
+  });
+
   it("rejects unauthorized export access", async () => {
     const response = await GET(
       new Request("https://revcast.example/api/waitlist/export"),
@@ -18,11 +29,16 @@ describe("GET /api/waitlist/export", () => {
   it("returns a csv export for authorized requests", async () => {
     const email = `export-${Date.now()}@example.com`;
 
-    await upsertWaitlistSignup({
-      email,
-      interest: "pro_monthly",
-      source: "landing_page",
-    });
+    listWaitlistSignupsMock.mockResolvedValue([
+      {
+        createdAt: "2026-03-15T10:00:00.000Z",
+        email,
+        id: `wait_${email}`,
+        interest: "pro_monthly",
+        source: "landing_page",
+        updatedAt: "2026-03-15T10:00:00.000Z",
+      },
+    ]);
 
     const response = await GET(
       new Request(
