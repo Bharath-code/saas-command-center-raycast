@@ -27,10 +27,15 @@ let initializedPromise: Promise<void> | null = null;
 
 function getWaitlistConnectionString() {
   const connectionString =
-    process.env.NEON_DATABASE_URL?.trim() || process.env.POSTGRES_URL?.trim();
+    process.env.DATABASE_URL?.trim() ||
+    process.env.DATABASE_URL_UNPOOLED?.trim() ||
+    process.env.NEON_DATABASE_URL?.trim() ||
+    process.env.POSTGRES_URL?.trim();
 
   if (!connectionString) {
-    throw new Error("Missing NEON_DATABASE_URL for waitlist storage.");
+    throw new Error(
+      "Missing database connection string. Please ensure DATABASE_URL, NEON_DATABASE_URL, or POSTGRES_URL is set in .env.local",
+    );
   }
 
   return connectionString;
